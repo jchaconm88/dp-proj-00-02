@@ -22,6 +22,18 @@ const DEFAULT_PAGE_SIZES = [5, 10, 25];
 
 export interface DpTableProps<T extends DpTableRow> {
   tableDef: DpTableDefColumn[];
+  /**
+   * Datos controlados externamente. Cuando se provee, la tabla se actualiza
+   * automáticamente al cambiar (compatible con `clientLoader` + `loaderData`).
+   * Si no se provee, usa la API imperativa via `ref.setDatasource()`.
+   */
+  data?: T[];
+  /**
+   * Estado de carga controlado externamente.
+   * Ej: `navigation.state !== "idle" || revalidator.state === "loading"`.
+   * Si no se provee, usa la API imperativa via `ref.setLoading()`.
+   */
+  loading?: boolean;
   linkColumn?: string;
   onDetail?: (row: T) => void;
   onEdit?: (row: T) => void;
@@ -104,6 +116,8 @@ function isDpTColumnChild(
 function DpTableInner<T extends DpTableRow>(
   {
     tableDef,
+    data: dataProp,
+    loading: loadingProp,
     linkColumn,
     onDetail,
     onEdit,
@@ -117,8 +131,10 @@ function DpTableInner<T extends DpTableRow>(
   }: DpTableProps<T>,
   ref: React.ForwardedRef<DpTableRef<T>>
 ) {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoadingState] = useState(false);
+  // Estado interno de filas — se alimenta por prop `data` o por la API imperativa ref.setDatasource()
+  const [rows, setRows] = useState<T[]>(dataProp ?? []);
+  // Estado interno de loading — se alimenta por prop `loading` o por ref.setLoading()
+  const [internalLoading, setInternalLoading] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [selection, setSelection] = useState<T[]>([]);
   const selectionRef = useRef(selection);
@@ -126,6 +142,14 @@ function DpTableInner<T extends DpTableRow>(
   useEffect(() => {
     selectionRef.current = selection;
   }, [selection]);
+
+  // Modo controlado: sincroniza datos externos → estado interno cuando cambia `data` prop
+  useEffect(() => {
+    if (dataProp !== undefined) setRows(dataProp);
+  }, [dataProp]);
+
+  // Loading efectivo: la prop externa tiene precedencia — permite control desde useNavigation/useRevalidator
+  const effectiveLoading = loadingProp !== undefined ? loadingProp : internalLoading;
 
   const columns = useMemo(
     () =>
@@ -138,12 +162,13 @@ function DpTableInner<T extends DpTableRow>(
   const filterColumns = useMemo(() => columns.filter((c) => c.filter !== false), [columns]);
   const globalFilterFields = useMemo(() => filterColumns.map((c) => c.column), [filterColumns]);
 
-  const setDatasource = useCallback((newData: T[]) => setData(newData), []);
+  // API imperativa — sigue funcionando para compatibilidad y casos de uso avanzados
+  const setDatasource = useCallback((newData: T[]) => setRows(newData), []);
   const clearDatasource = useCallback(() => {
-    setData([]);
+    setRows([]);
     setSelection([]);
   }, []);
-  const setLoading = useCallback((value: boolean) => setLoadingState(value), []);
+  const setLoading = useCallback((value: boolean) => setInternalLoading(value), []);
   const getSelectedRows = useCallback((): T[] => selectionRef.current, []);
   const clearSelectedRows = useCallback(() => setSelection([]), []);
   const filter = useCallback((value: string) => setGlobalFilter(value), []);
@@ -253,9 +278,9 @@ function DpTableInner<T extends DpTableRow>(
   return (
     <div className="space-y-4">
       <DataTable
-        value={data}
+        value={rows}
         dataKey="id"
-        loading={loading}
+        loading={effectiveLoading}
         selection={selection}
         onSelectionChange={(e) => setSelection(e.value ?? [])}
         selectionMode="multiple"

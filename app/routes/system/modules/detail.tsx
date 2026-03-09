@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import { getModule, saveModule } from "~/lib/firestore-modules";
-import type { ModuleRecord, ModulePermission, ModuleColumn } from "~/lib/firestore-modules";
-import type { Route } from "./+types/modules.$id";
+﻿import { useRef, useState, useMemo } from "react";
+import { useNavigate, useNavigation, useRevalidator } from "react-router";
+import { getModule, saveModule } from "~/features/modules";
+import type { ModuleRecord, ModulePermission, ModuleColumn } from "~/features/modules";
+import type { Route } from "./+types/detail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetPermissionDialog from "./modules/SetPermissionDialog";
-import SetColumnDialog from "./modules/SetColumnDialog";
-import SetModuleDialog from "./modules/SetModuleDialog";
-import { useDataLoader } from "~/lib/use-data-loader";
+import SetPermissionDialog from "./SetPermissionDialog";
+import SetColumnDialog from "./SetColumnDialog";
+import SetModuleDialog from "./SetModuleDialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -39,76 +38,56 @@ const COLUMNS_TABLE_DEF: DpTableDefColumn[] = [
   { header: "Formato", column: "format", order: 5, display: true, filter: true },
 ];
 
-export default function ModuleDetail() {
+// clientLoader: carga el módulo por ID antes de renderizar el componente.
+export async function clientLoader({ params }: Route.ClientLoaderArgs) {
+  if (!params.id) return { module: null };
+  const module = await getModule(params.id);
+  return { module: module ?? null };
+}
+
+export default function ModuleDetail({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
-  const { id: moduleId } = useParams<{ id: string }>();
-  const [module, setModule] = useState<ModuleRecord | null>(null);
-  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
+  const revalidator = useRevalidator();
+  const permissionTableRef = useRef<DpTableRef<PermissionRow>>(null);
+  const columnTableRef = useRef<DpTableRef<ColumnRow>>(null);
+
+  const { module } = loaderData;
+  const moduleId = module?.id ?? null;
+  const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
+
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
   const [permissionFilter, setPermissionFilter] = useState("");
   const [columnFilter, setColumnFilter] = useState("");
   const [selectedPermissionCount, setSelectedPermissionCount] = useState(0);
   const [selectedColumnCount, setSelectedColumnCount] = useState(0);
-
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
   const [permissionEditIndex, setPermissionEditIndex] = useState<number | null>(null);
   const [columnDialogOpen, setColumnDialogOpen] = useState(false);
   const [columnEditIndex, setColumnEditIndex] = useState<number | null>(null);
   const [editModuleOpen, setEditModuleOpen] = useState(false);
 
-  const permissionTableRef = useRef<DpTableRef<PermissionRow>>(null);
-  const columnTableRef = useRef<DpTableRef<ColumnRow>>(null);
+  // Filas derivadas del loaderData — se recalculan en cada revalidación (sin useEffect)
+  const permissionRows = useMemo<PermissionRow[]>(
+    () =>
+      (Array.isArray(module?.permissions) ? module.permissions : []).map((p, i) => ({
+        id: String(i),
+        code: p?.code ?? "",
+        label: p?.label ?? "",
+        description: p?.description ?? "",
+      })),
+    [module]
+  );
 
-  const withLoader = useDataLoader();
-
-  const fetchModule = async () => {
-    if (!moduleId) return;
-    setError(null);
-    await withLoader(async () => {
-      try {
-        const data = await getModule(moduleId);
-        setModule(data ?? null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar módulo.");
-      }
-    });
-  };
-
-  const fetchModuleWithLoading = async () => {
-    if (!moduleId) return;
-    setLoading(true);
-    setError(null);
-    await withLoader(async () => {
-      try {
-        const data = await getModule(moduleId);
-        setModule(data ?? null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar módulo.");
-      } finally {
-        setLoading(false);
-      }
-    });
-  };
-
-  useEffect(() => {
-    fetchModuleWithLoading();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleId]);
-
-  useEffect(() => {
-    if (module == null) return;
-    const pRows: PermissionRow[] = (Array.isArray(module.permissions) ? module.permissions : []).map(
-      (p, i) => ({ id: String(i), code: p?.code ?? "", label: p?.label ?? "", description: p?.description ?? "" })
-    );
-    const cRows: ColumnRow[] = (Array.isArray(module.columns) ? module.columns : []).map((col, i) => ({
-      id: String(i),
-      ...col,
-    }));
-    permissionTableRef.current?.setDatasource(pRows);
-    columnTableRef.current?.setDatasource(cRows);
-  }, [module]);
+  const columnRows = useMemo<ColumnRow[]>(
+    () =>
+      (Array.isArray(module?.columns) ? module.columns : []).map((col, i) => ({
+        id: String(i),
+        ...col,
+      })),
+    [module]
+  );
 
   const backToModules = () => navigate("/system/modules");
 
@@ -121,10 +100,11 @@ export default function ModuleDetail() {
       (_, i) => !indices.has(i)
     );
     setSaving(true);
+    setError(null);
     try {
       await saveModule(moduleId, { permissions: newPermissions });
-      await fetchModule();
       permissionTableRef.current?.clearSelectedRows();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     } finally {
@@ -139,10 +119,11 @@ export default function ModuleDetail() {
     const indices = new Set(selected.map((r) => parseInt(r.id, 10)));
     const newColumns = module.columns.filter((_, i) => !indices.has(i));
     setSaving(true);
+    setError(null);
     try {
       await saveModule(moduleId, { columns: newColumns });
-      await fetchModule();
       columnTableRef.current?.clearSelectedRows();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     } finally {
@@ -164,14 +145,6 @@ export default function ModuleDetail() {
     return (
       <DpContentInfo title="MÓDULO" backLabel="Volver a módulos" onBack={backToModules}>
         <p className="text-zinc-500">ID de módulo no válido.</p>
-      </DpContentInfo>
-    );
-  }
-
-  if (loading && !module) {
-    return (
-      <DpContentInfo title="MÓDULO" backLabel="Volver a módulos" onBack={backToModules}>
-        <p className="text-zinc-500">Cargando…</p>
       </DpContentInfo>
     );
   }
@@ -205,13 +178,18 @@ export default function ModuleDetail() {
           <DpContentHeader
             filterValue={permissionFilter}
             onFilter={handlePermissionFilter}
+            onLoad={() => revalidator.revalidate()}
             onCreate={() => { setPermissionEditIndex(null); setPermissionDialogOpen(true); }}
             onDelete={deletePermissions}
             deleteDisabled={selectedPermissionCount === 0 || saving}
+            loading={isLoading}
             filterPlaceholder="Filtrar permisos..."
           />
+          {/* data prop: modo controlado — se actualiza con cada revalidación */}
           <DpTable<PermissionRow>
             ref={permissionTableRef}
+            data={permissionRows}
+            loading={isLoading}
             tableDef={PERMISSIONS_TABLE_DEF}
             linkColumn="code"
             onDetail={(row) => { setPermissionEditIndex(parseInt(row.id, 10)); setPermissionDialogOpen(true); }}
@@ -229,13 +207,18 @@ export default function ModuleDetail() {
           <DpContentHeader
             filterValue={columnFilter}
             onFilter={handleColumnFilter}
+            onLoad={() => revalidator.revalidate()}
             onCreate={() => { setColumnEditIndex(null); setColumnDialogOpen(true); }}
             onDelete={deleteColumns}
             deleteDisabled={selectedColumnCount === 0 || saving}
+            loading={isLoading}
             filterPlaceholder="Filtrar columnas..."
           />
+          {/* data prop: modo controlado — se actualiza con cada revalidación */}
           <DpTable<ColumnRow>
             ref={columnTableRef}
+            data={columnRows}
+            loading={isLoading}
             tableDef={COLUMNS_TABLE_DEF}
             linkColumn="name"
             onDetail={(row) => { setColumnEditIndex(parseInt(row.id, 10)); setColumnDialogOpen(true); }}
@@ -252,7 +235,7 @@ export default function ModuleDetail() {
           moduleId={moduleId}
           permissionIndex={permissionEditIndex}
           currentPermissions={Array.isArray(module.permissions) ? module.permissions : []}
-          onSuccess={async () => { setPermissionDialogOpen(false); await fetchModule(); }}
+          onSuccess={async () => { setPermissionDialogOpen(false); revalidator.revalidate(); }}
           onHide={() => setPermissionDialogOpen(false)}
         />
 
@@ -261,14 +244,14 @@ export default function ModuleDetail() {
           moduleId={moduleId}
           columnIndex={columnEditIndex}
           currentColumns={Array.isArray(module.columns) ? module.columns : []}
-          onSuccess={async () => { setColumnDialogOpen(false); await fetchModule(); }}
+          onSuccess={async () => { setColumnDialogOpen(false); revalidator.revalidate(); }}
           onHide={() => setColumnDialogOpen(false)}
         />
 
         <SetModuleDialog
           visible={editModuleOpen}
           moduleId={moduleId}
-          onSuccess={() => { setEditModuleOpen(false); fetchModule(); }}
+          onSuccess={() => { setEditModuleOpen(false); revalidator.revalidate(); }}
           onHide={() => setEditModuleOpen(false)}
         />
       </div>

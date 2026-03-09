@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+import { useNavigation } from "react-router";
 import { Checkbox } from "primereact/checkbox";
 import { MultiSelect } from "primereact/multiselect";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { updateRole, type RolePermissions } from "~/lib/firestore-roles";
-import { getModules, getModule } from "~/lib/firestore-modules";
-import type { ModuleRecord, ModulePermission } from "~/lib/firestore-modules";
+import { updateRole, type RolePermissions } from "~/features/roles";
+import { getModules, getModule } from "~/features/modules";
+import type { ModuleRecord, ModulePermission } from "~/features/modules";
 
 export interface SetRolePermissionDialogProps {
   visible: boolean;
@@ -32,6 +33,8 @@ export default function SetRolePermissionDialog({
   const [selectedCodes, setSelectedCodes] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== "idle";
 
   // Inicializar cuando se abre
   useEffect(() => {
@@ -102,8 +105,8 @@ export default function SetRolePermissionDialog({
       onCancel={onHide}
       saveLabel="Guardar"
       onSave={save}
-      saving={saving}
-      saveDisabled={!selectedModuleId}
+      saving={saving || isNavigating}
+      saveDisabled={!selectedModuleId || isNavigating}
       visible={visible}
       onHide={onHide}
     >

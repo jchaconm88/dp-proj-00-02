@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { getModules, deleteModule } from "~/lib/firestore-modules";
-import type { ModuleRecord } from "~/lib/firestore-modules";
-import type { Route } from "./+types/modules";
+﻿import { useRef, useState } from "react";
+import { useNavigate, useNavigation, useRevalidator } from "react-router";
+import { getModules, deleteModule, type ModuleRecord } from "~/features/modules";
+import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetModuleDialog from "./modules/SetModuleDialog";
-import { useDataLoader } from "~/lib/use-data-loader";
+import SetModuleDialog from "./SetModuleDialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,15 +13,22 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+// clientLoader: carga datos antes de renderizar el componente.
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  const { items } = await getModules();
+  return { modules: items };
+}
+
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Colección", column: "id", order: 1, display: true, filter: true },
   { header: "Descripción", column: "description", order: 2, display: true, filter: true },
 ];
 
-export default function Modules() {
+export default function Modules({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
+  const navigation = useNavigation();
+  const revalidator = useRevalidator();
   const tableRef = useRef<DpTableRef<ModuleRecord>>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -31,29 +36,8 @@ export default function Modules() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const withLoader = useDataLoader();
-
-  const fetchModules = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    tableRef.current?.setLoading(true);
-    await withLoader(async () => {
-      try {
-        const { items } = await getModules();
-        tableRef.current?.setDatasource(items);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar módulos.");
-        tableRef.current?.clearDatasource();
-      } finally {
-        setLoading(false);
-        tableRef.current?.setLoading(false);
-      }
-    });
-  }, [withLoader]);
-
-  useEffect(() => {
-    fetchModules();
-  }, [fetchModules]);
+  // Loading unificado: navegación entre rutas + revalidaciones
+  const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
 
   const handleFilter = (value: string) => {
     setFilterValue(value);
@@ -79,10 +63,11 @@ export default function Modules() {
     if (selected.length === 0) return;
     if (!confirm(`¿Eliminar ${selected.length} módulo(s)?`)) return;
     setSaving(true);
+    setError(null);
     try {
       await Promise.all(selected.map((m) => deleteModule(m.id)));
       tableRef.current?.clearSelectedRows();
-      await fetchModules();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     } finally {
@@ -95,11 +80,11 @@ export default function Modules() {
       <DpContentHeader
         filterValue={filterValue}
         onFilter={handleFilter}
-        onLoad={fetchModules}
+        onLoad={() => revalidator.revalidate()}
         onCreate={openAdd}
         onDelete={handleDeleteSelected}
         deleteDisabled={selectedCount === 0 || saving}
-        loading={loading}
+        loading={isLoading}
         filterPlaceholder="Filtrar por colección o descripción..."
       />
 
@@ -109,8 +94,11 @@ export default function Modules() {
         </div>
       )}
 
+      {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
       <DpTable<ModuleRecord>
         ref={tableRef}
+        data={loaderData.modules}
+        loading={isLoading}
         tableDef={TABLE_DEF}
         linkColumn="id"
         onDetail={openInfo}
@@ -131,7 +119,7 @@ export default function Modules() {
             // Si es nuevo, navegar a su detalle
             navigate("/system/modules/" + encodeURIComponent(id));
           } else {
-            fetchModules();
+            revalidator.revalidate();
           }
         }}
         onHide={() => setDialogVisible(false)}

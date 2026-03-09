@@ -1,12 +1,13 @@
-import { useMemo, useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router";
+﻿import { useMemo, useEffect, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate, redirect } from "react-router";
 import { useAuth } from "~/lib/auth-context";
 import { useTheme } from "~/lib/theme-context";
 import type { Route } from "./+types/dashboard";
 import menuData from "~/data/menu.json";
-import { getAllRoles, type RoleRecord } from "~/lib/firestore-roles";
+import { getAllRoles, type RoleRecord } from "~/features/roles";
 import { isGranted } from "~/lib/accessService";
 import { Dropdown } from "primereact/dropdown";
+import { getAuthUser } from "~/lib/get-auth-user";
 
 export type MenuItemJson = {
   title: string;
@@ -89,25 +90,30 @@ export function meta({}: Route.MetaArgs) {
   return [{ title: "Panel" }, { name: "description", content: "Panel de administración" }];
 }
 
-export default function DashboardLayout() {
-  const { user, profile, loading, signOut } = useAuth();
+/**
+ * clientLoader: verifica autenticación ANTES de renderizar el dashboard.
+ * Si no hay sesión activa, redirige a /login sin mostrar el componente ni ningún spinner.
+ * También pre-carga los roles para el cálculo de permisos del menú.
+ */
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  const user = await getAuthUser();
+  if (!user) throw redirect("/login");
+  const roles = await getAllRoles();
+  return { roles };
+}
+
+export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
+  const { user, profile, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const roleIds = profile?.roleIds ?? ["user"];
-  const [roles, setRoles] = useState<RoleRecord[]>([]);
 
-  useEffect(() => {
-    if (!user) return;
-    getAllRoles()
-      .then(setRoles)
-      .catch(() => setRoles([]));
-  }, [user]);
-
+  // Roles cargados desde clientLoader — sin useEffect ni estado manual
   const effectivePermissions = useMemo(
-    () => getEffectivePermissions(roleIds, roles),
-    [roleIds, roles]
+    () => getEffectivePermissions(roleIds, loaderData.roles),
+    [roleIds, loaderData.roles]
   );
   const filteredMenu = useMemo(
     () => filterMenu(menuData as MenuItemJson[], effectivePermissions),
@@ -156,18 +162,10 @@ export default function DashboardLayout() {
     if (activeMenuTitle) setExpandedKeys((prev) => new Set(prev).add(activeMenuTitle));
   }, [activeMenuTitle]);
 
-  useEffect(() => {
-    if (loading) return;
-    if (!user) navigate("/login", { replace: true });
-  }, [user, loading, navigate]);
-
-  if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-100 dark:bg-navy-900">
-        <p className="text-zinc-600 dark:text-navy-300">Cargando…</p>
-      </div>
-    );
-  }
+  // clientLoader ya garantizó que hay usuario autenticado antes de renderizar.
+  // Este guard cubre el breve instante inicial en que AuthProvider aún no actualizó su estado React.
+  // PaceLoader muestra el indicador visual durante el clientLoader — sin spinner propio aquí.
+  if (!user) return null;
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-100 dark:bg-navy-900">
@@ -217,7 +215,10 @@ export default function DashboardLayout() {
             </div>
             <button
               type="button"
-              onClick={() => signOut()}
+              onClick={async () => {
+                await signOut();
+                navigate("/login", { replace: true });
+              }}
               className="rounded-lg px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-navy-300 dark:hover:bg-navy-600 dark:hover:text-navy-100"
             >
               Cerrar sesión
@@ -269,14 +270,14 @@ export default function DashboardLayout() {
                               <div className="ml-4 border-l border-zinc-200 pl-2 dark:border-navy-500">
                                 {item.children!.map((child, j) => {
                                   const childHref = child.link ?? "#";
-                                  const childActive = childHref !== "#" && pathname === childHref;
                                   return (
                                     <NavLink
                                       key={j}
                                       to={childHref}
-                                      className={({ isActive: active }) =>
+                                      end={false}
+                                      className={({ isActive }) =>
                                         `mb-0.5 flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors no-underline ${
-                                          (active || childActive)
+                                          isActive
                                             ? "bg-blue-100 font-medium text-blue-800 dark:bg-navy-500 dark:text-navy-100"
                                             : "text-zinc-600 hover:bg-zinc-200/80 dark:text-navy-300 dark:hover:bg-navy-600"
                                         }`

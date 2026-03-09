@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+﻿import { useRef, useState } from "react";
+import { useNavigate, useNavigation, useRevalidator } from "react-router";
 import { Checkbox } from "primereact/checkbox";
 import {
   getRoleById,
   updateRole,
   type RoleRecord,
   type RolePermissions,
-} from "~/lib/firestore-roles";
-import type { Route } from "./+types/roles.$id";
+} from "~/features/roles";
+import type { Route } from "./+types/detail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetRoleDialog from "./roles/SetRoleDialog";
-import SetRolePermissionDialog from "./roles/SetRolePermissionDialog";
-import { useDataLoader } from "~/lib/use-data-loader";
+import SetRoleDialog from "./SetRoleDialog";
+import SetRolePermissionDialog from "./SetRolePermissionDialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -35,69 +34,39 @@ const PERMISSIONS_TABLE_DEF: DpTableDefColumn[] = [
   { header: "Permisos", column: "permissions", order: 2, display: true, filter: true },
 ];
 
-export default function RoleDetail() {
-  const navigate = useNavigate();
-  const { id: roleId } = useParams<{ id: string }>();
+// clientLoader: carga el rol por ID antes de renderizar el componente.
+export async function clientLoader({ params }: Route.ClientLoaderArgs) {
+  if (!params.id) return { role: null };
+  const role = await getRoleById(params.id);
+  return { role: role ?? null };
+}
 
-  const [role, setRole] = useState<RoleRecord | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function RoleDetail({ loaderData }: Route.ComponentProps) {
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+  const revalidator = useRevalidator();
+  const permissionTableRef = useRef<DpTableRef<PermissionRow>>(null);
+
+  const { role } = loaderData;
+  const roleId = role?.id ?? null;
+  const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
+
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
   const [permissionFilter, setPermissionFilter] = useState("");
   const [selectedPermissionCount, setSelectedPermissionCount] = useState(0);
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
   const [permissionEditModuleId, setPermissionEditModuleId] = useState<string | null>(null);
   const [editRoleOpen, setEditRoleOpen] = useState(false);
 
-  const permissionTableRef = useRef<DpTableRef<PermissionRow>>(null);
-
-  const withLoader = useDataLoader();
-
-  const fetchRole = async () => {
-    if (!roleId) return;
-    setError(null);
-    await withLoader(async () => {
-      try {
-        const data = await getRoleById(roleId);
-        setRole(data ?? null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar rol.");
-      }
-    });
-  };
-
-  const fetchRoleWithLoading = async () => {
-    if (!roleId) return;
-    setLoading(true);
-    setError(null);
-    await withLoader(async () => {
-      try {
-        const data = await getRoleById(roleId);
-        setRole(data ?? null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar rol.");
-      } finally {
-        setLoading(false);
-      }
-    });
-  };
-
-  useEffect(() => {
-    fetchRoleWithLoading();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleId]);
-
-  useEffect(() => {
-    if (role == null) return;
-    const perms = role.permissions ?? {};
-    const rows: PermissionRow[] = Object.entries(perms).map(([moduleId, codes]) => ({
+  // Filas de permisos derivadas del loaderData — se recalculan en cada revalidación
+  const permissionRows: PermissionRow[] = Object.entries(role?.permissions ?? {}).map(
+    ([moduleId, codes]) => ({
       id: moduleId,
       moduleId,
       permissions: Array.isArray(codes) ? codes : [],
-    }));
-    permissionTableRef.current?.setDatasource(rows);
-  }, [role]);
+    })
+  );
 
   const backToRoles = () => navigate("/system/roles");
 
@@ -111,10 +80,11 @@ export default function RoleDetail() {
       if (!toRemove.has(moduleId)) newPermissions[moduleId] = codes;
     }
     setSaving(true);
+    setError(null);
     try {
       await updateRole(roleId, { permissions: newPermissions });
-      await fetchRole();
       permissionTableRef.current?.clearSelectedRows();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     } finally {
@@ -144,7 +114,7 @@ export default function RoleDetail() {
     }
     try {
       await updateRole(roleId, { permissions: newPermissions });
-      await fetchRole();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al actualizar acceso total.");
     } finally {
@@ -160,14 +130,6 @@ export default function RoleDetail() {
     );
   }
 
-  if (loading && !role) {
-    return (
-      <DpContentInfo title="ROL" backLabel="Volver a roles" onBack={backToRoles}>
-        <p className="text-zinc-500">Cargando…</p>
-      </DpContentInfo>
-    );
-  }
-
   if (!role) {
     return (
       <DpContentInfo title="ROL" backLabel="Volver a roles" onBack={backToRoles}>
@@ -178,7 +140,7 @@ export default function RoleDetail() {
 
   return (
     <DpContentInfo
-      title={role.description || role.name}
+      title={role.name || roleId}
       backLabel="Volver a roles"
       onBack={backToRoles}
       editLabel="Editar rol"
@@ -192,27 +154,20 @@ export default function RoleDetail() {
         )}
 
         {/* Acceso total */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Acceso</h2>
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-            <Checkbox
-              inputId="role-full-access"
-              checked={hasFullAccess}
-              onChange={(e) => onFullAccessChange(e.checked === true)}
-              disabled={saving}
-            />
-            <label
-              htmlFor="role-full-access"
-              className="cursor-pointer text-sm text-zinc-700 dark:text-zinc-300"
-            >
-              Acceso total (permiso{" "}
-              <code className="rounded bg-zinc-200 px-1 dark:bg-zinc-600">*:*</code>)
-            </label>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              Si está activo, el rol tendrá todos los permisos sin definir módulos concretos.
-            </span>
-          </div>
-        </section>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-200 p-3 dark:border-navy-600">
+          <Checkbox
+            inputId="full-access"
+            checked={hasFullAccess}
+            onChange={(e) => onFullAccessChange(e.checked === true)}
+            disabled={saving || isLoading}
+          />
+          <label
+            htmlFor="full-access"
+            className="cursor-pointer text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          >
+            Acceso total al sistema (*.*) — este rol puede hacer cualquier operación
+          </label>
+        </div>
 
         {/* Permisos por módulo */}
         <section className="space-y-4">
@@ -222,29 +177,25 @@ export default function RoleDetail() {
           <DpContentHeader
             filterValue={permissionFilter}
             onFilter={handlePermissionFilter}
-            onCreate={() => {
-              setPermissionEditModuleId(null);
-              setPermissionDialogOpen(true);
-            }}
+            onLoad={() => revalidator.revalidate()}
+            onCreate={() => { setPermissionEditModuleId(null); setPermissionDialogOpen(true); }}
             onDelete={deletePermissions}
             deleteDisabled={selectedPermissionCount === 0 || saving}
-            filterPlaceholder="Filtrar por módulo o permisos..."
+            loading={isLoading}
+            filterPlaceholder="Filtrar módulos..."
           />
+          {/* data prop: modo controlado — se actualiza con cada revalidación */}
           <DpTable<PermissionRow>
             ref={permissionTableRef}
+            data={permissionRows}
+            loading={isLoading}
             tableDef={PERMISSIONS_TABLE_DEF}
             linkColumn="moduleId"
-            onDetail={(row) => {
-              setPermissionEditModuleId(row.moduleId);
-              setPermissionDialogOpen(true);
-            }}
-            onEdit={(row) => {
-              setPermissionEditModuleId(row.moduleId);
-              setPermissionDialogOpen(true);
-            }}
+            onDetail={(row) => { setPermissionEditModuleId(row.moduleId); setPermissionDialogOpen(true); }}
+            onEdit={(row) => { setPermissionEditModuleId(row.moduleId); setPermissionDialogOpen(true); }}
             onSelectionChange={(rows) => setSelectedPermissionCount(rows.length)}
             showFilterInHeader={false}
-            emptyMessage="No hay permisos asignados. Agregar para definir."
+            emptyMessage="No hay permisos. Agregar para definir."
             emptyFilterMessage="No hay resultados."
           />
         </section>
@@ -254,20 +205,14 @@ export default function RoleDetail() {
           roleId={roleId}
           editModuleId={permissionEditModuleId}
           currentPermissions={role.permissions ?? {}}
-          onSuccess={async () => {
-            setPermissionDialogOpen(false);
-            await fetchRole();
-          }}
+          onSuccess={async () => { setPermissionDialogOpen(false); revalidator.revalidate(); }}
           onHide={() => setPermissionDialogOpen(false)}
         />
 
         <SetRoleDialog
           visible={editRoleOpen}
           roleId={roleId}
-          onSuccess={() => {
-            setEditRoleOpen(false);
-            fetchRole();
-          }}
+          onSuccess={() => { setEditRoleOpen(false); revalidator.revalidate(); }}
           onHide={() => setEditRoleOpen(false)}
         />
       </div>

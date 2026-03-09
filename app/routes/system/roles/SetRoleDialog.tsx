@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { getRoleById, addRole, updateRole } from "~/lib/firestore-roles";
+import { getRoleById, addRole, updateRole } from "~/features/roles";
 
 export interface SetRoleDialogProps {
   visible: boolean;
@@ -23,6 +24,8 @@ export default function SetRoleDialog({
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== "idle";
 
   useEffect(() => {
     if (!visible) return;
@@ -75,8 +78,8 @@ export default function SetRoleDialog({
       onCancel={onHide}
       saveLabel="Guardar"
       onSave={save}
-      saving={saving}
-      saveDisabled={!name.trim()}
+      saving={saving || isNavigating}
+      saveDisabled={!name.trim() || isNavigating}
       visible={visible}
       onHide={onHide}
     >

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { saveModule } from "~/lib/firestore-modules";
-import type { ModuleColumn } from "~/lib/firestore-modules";
+import { saveModule } from "~/features/modules";
+import type { ModuleColumn } from "~/features/modules";
 
 export interface SetColumnDialogProps {
   visible: boolean;
@@ -38,6 +39,8 @@ export default function SetColumnDialog({
   const [format, setFormat] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== "idle";
 
   useEffect(() => {
     if (!visible) return;
@@ -98,8 +101,8 @@ export default function SetColumnDialog({
       onCancel={onHide}
       saveLabel="Guardar"
       onSave={save}
-      saving={saving}
-      saveDisabled={!valid}
+      saving={saving || isNavigating}
+      saveDisabled={!valid || isNavigating}
       visible={visible}
       onHide={onHide}
     >

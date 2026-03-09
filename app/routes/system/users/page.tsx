@@ -1,18 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useRef, useState } from "react";
+import { useNavigation, useRevalidator } from "react-router";
 import {
   deleteProfile,
   getProfiles,
   saveProfile,
   type ProfileRecord,
-} from "~/lib/firestore-users";
-import type { Route } from "./+types/users";
+} from "~/features/users";
+import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
-import {
-  DpTable,
-  type DpTableRef,
-  type DpTableDefColumn,
-} from "~/components/DpTable";
-import { useDataLoader } from "~/lib/use-data-loader";
+import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,43 +17,29 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+// clientLoader: carga datos antes de renderizar el componente.
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  const { items } = await getProfiles();
+  return { users: items };
+}
+
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Nombre", column: "displayName", order: 1, display: true, filter: true },
   { header: "Correo",  column: "email",       order: 2, display: true, filter: true },
   { header: "Roles",   column: "roleIds",     order: 3, display: true, filter: false },
 ];
 
-export default function Users() {
+export default function Users({ loaderData }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const revalidator = useRevalidator();
   const tableRef = useRef<DpTableRef<ProfileRecord>>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCount, setSelectedCount] = useState(0);
   const [filterValue, setFilterValue] = useState("");
   const [editing, setEditing] = useState<ProfileRecord | null>(null);
 
-  const withLoader = useDataLoader();
-
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    tableRef.current?.setLoading(true);
-    await withLoader(async () => {
-      try {
-        const { items } = await getProfiles();
-        tableRef.current?.setDatasource(items);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar usuarios.");
-        tableRef.current?.clearDatasource();
-      } finally {
-        setLoading(false);
-        tableRef.current?.setLoading(false);
-      }
-    });
-  }, [withLoader]);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  // Loading unificado: navegación entre rutas + revalidaciones
+  const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
 
   const handleFilter = (value: string) => {
     setFilterValue(value);
@@ -71,7 +53,7 @@ export default function Users() {
     try {
       await Promise.all(selected.map((u) => deleteProfile(u.id)));
       tableRef.current?.clearSelectedRows();
-      await fetchUsers();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     }
@@ -90,7 +72,7 @@ export default function Users() {
         roleIds: editing.roleIds,
       });
       setEditing(null);
-      fetchUsers();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar.");
     }
@@ -101,10 +83,10 @@ export default function Users() {
       <DpContentHeader
         filterValue={filterValue}
         onFilter={handleFilter}
-        onLoad={fetchUsers}
+        onLoad={() => revalidator.revalidate()}
         onDelete={handleDeleteSelected}
-        deleteDisabled={selectedCount === 0 || loading}
-        loading={loading}
+        deleteDisabled={selectedCount === 0 || isLoading}
+        loading={isLoading}
         filterPlaceholder="Filtrar por nombre o correo..."
       />
 
@@ -114,8 +96,11 @@ export default function Users() {
         </div>
       )}
 
+      {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
       <DpTable<ProfileRecord>
         ref={tableRef}
+        data={loaderData.users}
+        loading={isLoading}
         tableDef={TABLE_DEF}
         linkColumn="displayName"
         onDetail={handleEdit}

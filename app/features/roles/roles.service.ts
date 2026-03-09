@@ -1,24 +1,8 @@
-import { ROLES_COLLECTION } from "./auth-context";
-import { firestoreService } from "./firestore.service";
+import { ROLES_COLLECTION } from "~/lib/auth-context";
+import { firestoreService } from "~/lib/firestore.service";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
-
-/** Por cada módulo (id de colección), lista de códigos de permiso asignados al rol. */
-export type RolePermissions = Record<string, string[]>;
-
-export type RoleRecord = {
-  id: string;
-  name: string;
-  description: string;
-  /** Permisos estructurados por módulo: { moduleId: string[] } */
-  permissions: RolePermissions;
-  /** @deprecated Usar permissions. Campo legacy para compatibilidad. */
-  permission?: string[];
-  createBy?: string;
-  createAt?: unknown;
-  updateBy?: string;
-  updateAt?: unknown;
-};
+import { db } from "~/lib/firebase";
+import type { RoleRecord, RolePermissions } from "./roles.types";
 
 type RoleDoc = {
   name?: string;
@@ -68,10 +52,7 @@ export async function getRoles(opts?: {
   pageSize?: number;
   last?: unknown;
 }): Promise<{ items: RoleRecord[]; last: null }> {
-  const rows = await firestoreService.getDocuments<RoleDoc>(
-    ROLES_COLLECTION,
-    opts?.pageSize ?? 200
-  );
+  const rows = await firestoreService.getDocuments<RoleDoc>(ROLES_COLLECTION, opts?.pageSize ?? 200);
   const items = rows.map((r) => toRoleRecord(r.id, r.data));
   items.sort((a, b) => a.name.localeCompare(b.name));
   return { items, last: null };
@@ -86,10 +67,7 @@ export async function getAllRoles(): Promise<RoleRecord[]> {
 }
 
 /** Crea un rol nuevo. */
-export async function addRole(data: {
-  name: string;
-  description: string | null;
-}): Promise<string> {
+export async function addRole(data: { name: string; description: string | null }): Promise<string> {
   return firestoreService.addDocument(ROLES_COLLECTION, {
     name: data.name,
     description: data.description ?? "",
@@ -98,18 +76,12 @@ export async function addRole(data: {
 }
 
 /** Actualiza campos parciales de un rol. */
-export async function updateRole(
-  id: string,
-  data: Partial<Omit<RoleRecord, "id">>
-): Promise<void> {
+export async function updateRole(id: string, data: Partial<Omit<RoleRecord, "id">>): Promise<void> {
   await firestoreService.updateDocument(ROLES_COLLECTION, id, data);
 }
 
 /** @deprecated Usar addRole/updateRole */
-export async function saveRole(
-  id: string,
-  data: Omit<RoleRecord, "id">
-): Promise<string> {
+export async function saveRole(id: string, data: Omit<RoleRecord, "id">): Promise<string> {
   const payload = {
     name: data.name,
     description: data.description,

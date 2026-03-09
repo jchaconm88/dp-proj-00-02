@@ -1,36 +1,9 @@
-import { firestoreService } from "./firestore.service";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db, auth } from "./firebase";
+import { firestoreService } from "~/lib/firestore.service";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "~/lib/firebase";
+import type { ModuleRecord, ModuleEditInput } from "./modules.types";
 
 const COLLECTION = "modules";
-
-export interface ModulePermission {
-  code: string;
-  label: string;
-  description: string;
-}
-
-export interface ModuleColumn {
-  order: number;
-  name: string;
-  header: string;
-  filter: boolean;
-  format?: string;
-}
-
-export interface ModuleRecord {
-  id: string;
-  description: string;
-  permissions: ModulePermission[];
-  columns: ModuleColumn[];
-}
-
-export type ModuleEditInput = Partial<Omit<ModuleRecord, "id">>;
 
 type ModuleDoc = Omit<ModuleRecord, "id">;
 
@@ -62,9 +35,7 @@ function normalizeRecord(id: string, data: Record<string, unknown>): ModuleRecor
         name: String(col?.name ?? ""),
         header: String(col?.header ?? ""),
         filter: Boolean(col?.filter),
-        ...(col?.format != null && col.format !== ""
-          ? { format: String(col.format) }
-          : {}),
+        ...(col?.format != null && col.format !== "" ? { format: String(col.format) } : {}),
       };
     }),
   };
@@ -80,18 +51,13 @@ export async function getModule(id: string): Promise<ModuleRecord | null> {
 /** Lista todos los módulos. */
 export async function getModules(): Promise<{ items: ModuleRecord[] }> {
   const rows = await firestoreService.getDocuments<ModuleDoc>(COLLECTION, 200);
-  const items = rows.map((r) =>
-    normalizeRecord(r.id, r.data as unknown as Record<string, unknown>)
-  );
+  const items = rows.map((r) => normalizeRecord(r.id, r.data as unknown as Record<string, unknown>));
   items.sort((a, b) => a.id.localeCompare(b.id));
   return { items };
 }
 
 /** Crea un módulo con id = name. */
-export async function addModule(data: {
-  name: string;
-  description: string;
-}): Promise<void> {
+export async function addModule(data: { name: string; description: string }): Promise<void> {
   const email = auth.currentUser?.email ?? undefined;
   await setDoc(doc(db, COLLECTION, data.name.trim()), {
     description: data.description.trim(),
@@ -103,10 +69,7 @@ export async function addModule(data: {
 }
 
 /** Actualiza un módulo (campos parciales). */
-export async function saveModule(
-  id: string,
-  data: ModuleEditInput
-): Promise<void> {
+export async function saveModule(id: string, data: ModuleEditInput): Promise<void> {
   await firestoreService.updateDocument<ModuleDoc>(COLLECTION, id, data as Partial<ModuleDoc>);
 }
 

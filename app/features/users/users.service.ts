@@ -1,12 +1,6 @@
-import { PROFILES_COLLECTION } from "./auth-context";
-import { firestoreService } from "./firestore.service";
-
-export type ProfileRecord = {
-  id: string;
-  email: string;
-  displayName: string;
-  roleIds: string[];
-};
+import { PROFILES_COLLECTION } from "~/lib/auth-context";
+import { firestoreService } from "~/lib/firestore.service";
+import type { ProfileRecord } from "./users.types";
 
 type ProfileDoc = {
   email: string;
@@ -23,14 +17,8 @@ function toProfileRecord(id: string, data: ProfileDoc): ProfileRecord {
   };
 }
 
-export async function getProfiles(): Promise<{
-  items: ProfileRecord[];
-  last: null;
-}> {
-  const rows = await firestoreService.getDocuments<ProfileDoc>(
-    PROFILES_COLLECTION,
-    200
-  );
+export async function getProfiles(): Promise<{ items: ProfileRecord[]; last: null }> {
+  const rows = await firestoreService.getDocuments<ProfileDoc>(PROFILES_COLLECTION, 200);
   const items = rows.map((r) => toProfileRecord(r.id, r.data));
   items.sort((a, b) =>
     (a.displayName || a.email).localeCompare(b.displayName || b.email)
@@ -38,10 +26,7 @@ export async function getProfiles(): Promise<{
   return { items, last: null };
 }
 
-export async function saveProfile(
-  id: string,
-  data: Omit<ProfileRecord, "id">
-): Promise<void> {
+export async function saveProfile(id: string, data: Omit<ProfileRecord, "id">): Promise<void> {
   await firestoreService.updateDocument(PROFILES_COLLECTION, id, {
     email: data.email,
     displayName: data.displayName,

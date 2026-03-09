@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { saveModule } from "~/lib/firestore-modules";
-import type { ModulePermission } from "~/lib/firestore-modules";
+import { saveModule } from "~/features/modules";
+import type { ModulePermission } from "~/features/modules";
 
 export interface SetPermissionDialogProps {
   visible: boolean;
@@ -28,6 +29,8 @@ export default function SetPermissionDialog({
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== "idle";
 
   useEffect(() => {
     if (!visible) return;
@@ -77,8 +80,8 @@ export default function SetPermissionDialog({
       onCancel={onHide}
       saveLabel="Guardar"
       onSave={save}
-      saving={saving}
-      saveDisabled={!code.trim()}
+      saving={saving || isNavigating}
+      saveDisabled={!code.trim() || isNavigating}
       visible={visible}
       onHide={onHide}
     >

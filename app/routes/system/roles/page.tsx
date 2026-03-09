@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
-import { getRoles, deleteRole, type RoleRecord } from "~/lib/firestore-roles";
-import type { Route } from "./+types/roles";
+﻿import { useRef, useState } from "react";
+import { useNavigate, useNavigation, useRevalidator } from "react-router";
+import { getRoles, deleteRole, type RoleRecord } from "~/features/roles";
+import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetRoleDialog from "./roles/SetRoleDialog";
-import { useDataLoader } from "~/lib/use-data-loader";
+import SetRoleDialog from "./SetRoleDialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,15 +13,22 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+// clientLoader: carga datos antes de renderizar el componente.
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  const { items } = await getRoles();
+  return { roles: items };
+}
+
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Nombre", column: "name", order: 1, display: true, filter: true },
   { header: "Descripción", column: "description", order: 2, display: true, filter: true },
 ];
 
-export default function Roles() {
+export default function Roles({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
+  const navigation = useNavigation();
+  const revalidator = useRevalidator();
   const tableRef = useRef<DpTableRef<RoleRecord>>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -30,29 +36,8 @@ export default function Roles() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const withLoader = useDataLoader();
-
-  const fetchRoles = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    tableRef.current?.setLoading(true);
-    await withLoader(async () => {
-      try {
-        const { items } = await getRoles();
-        tableRef.current?.setDatasource(items);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cargar roles.");
-        tableRef.current?.clearDatasource();
-      } finally {
-        setLoading(false);
-        tableRef.current?.setLoading(false);
-      }
-    });
-  }, [withLoader]);
-
-  useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+  // Loading unificado: navegación entre rutas + revalidaciones
+  const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
 
   const handleFilter = (value: string) => {
     setFilterValue(value);
@@ -78,10 +63,11 @@ export default function Roles() {
     if (selected.length === 0) return;
     if (!confirm(`¿Eliminar ${selected.length} rol(es)?`)) return;
     setSaving(true);
+    setError(null);
     try {
       await Promise.all(selected.map((r) => deleteRole(r.id)));
       tableRef.current?.clearSelectedRows();
-      await fetchRoles();
+      revalidator.revalidate();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al eliminar.");
     } finally {
@@ -94,11 +80,11 @@ export default function Roles() {
       <DpContentHeader
         filterValue={filterValue}
         onFilter={handleFilter}
-        onLoad={fetchRoles}
+        onLoad={() => revalidator.revalidate()}
         onCreate={openAdd}
         onDelete={handleDeleteSelected}
         deleteDisabled={selectedCount === 0 || saving}
-        loading={loading}
+        loading={isLoading}
         filterPlaceholder="Filtrar por nombre o descripción..."
       />
 
@@ -108,8 +94,11 @@ export default function Roles() {
         </div>
       )}
 
+      {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
       <DpTable<RoleRecord>
         ref={tableRef}
+        data={loaderData.roles}
+        loading={isLoading}
         tableDef={TABLE_DEF}
         linkColumn="name"
         onDetail={openInfo}
@@ -126,7 +115,7 @@ export default function Roles() {
         roleId={editingId}
         onSuccess={() => {
           setDialogVisible(false);
-          fetchRoles();
+          revalidator.revalidate();
         }}
         onHide={() => setDialogVisible(false)}
       />
