@@ -15,7 +15,7 @@ app/
 │   │   └── index.ts              ← barrel: export * from types + service
 ├── routes/
 │   ├── dashboard.tsx             ← layout protegido (auth en clientLoader)
-│   ├── system/
+│   ├── {module}/                 ← agrupado por módulo según menu.json (system, human-resources, etc.)
 │   │   └── {feature}/
 │   │       ├── page.tsx          ← lista principal con clientLoader + DpTable
 │   │       ├── add.tsx           ← ruta hijo, solo retorna null (dialog en page.tsx)
@@ -108,7 +108,9 @@ export * from "./{feature}.types";
 export * from "./{feature}.service";
 ```
 
-### 4.2 Paso 2 — Crear rutas en `routes/system/{feature}/`
+### 4.2 Paso 2 — Crear rutas en `routes/{module}/{feature}/`
+
+Nota: `{module}` debe coincidir con los grupos definidos en `app/data/menu.json` (ej: `system`, `human-resources`, `masters`, `logistics`, `transport`).
 
 **`page.tsx`** — lista principal:
 ```tsx
@@ -128,8 +130,8 @@ export default function {Feature}Page({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const navigation = useNavigation();
   const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
-  const isAdd = !!useMatch("/system/{feature}/add");
-  const editMatch = useMatch("/system/{feature}/edit/:id");
+  const isAdd = !!useMatch("/{module}/{feature}/add");
+  const editMatch = useMatch("/{module}/{feature}/edit/:id");
 
   // usa DpContent + DpContentHeader + DpTable con data prop
 }
@@ -166,9 +168,9 @@ export default function Set{Feature}Dialog({ visible, ... }) {
 ### 4.3 Paso 3 — Registrar en `routes.ts`
 
 ```typescript
-route("system/{feature}", "routes/system/{feature}/page.tsx", [
-  route("add",       "routes/system/{feature}/add.tsx"),
-  route("edit/:id",  "routes/system/{feature}/edit.tsx"),
+route("{module}/{feature}", "routes/{module}/{feature}/page.tsx", [
+  route("add",       "routes/{module}/{feature}/add.tsx"),
+  route("edit/:id",  "routes/{module}/{feature}/edit.tsx"),
 ]),
 ```
 

@@ -27,7 +27,10 @@ export default [
     route("masters/document-types", "routes/placeholder/masters-document-types.tsx"),
     route("masters/documents",      "routes/placeholder/masters-documents.tsx"),
     route("masters/clients",        "routes/placeholder/masters-clients.tsx"),
-    route("human-resources/employees", "routes/placeholder/hr-employees.tsx"),
+    route("human-resources/employees", "routes/human-resources/employees/page.tsx", [
+      route("add",       "routes/human-resources/employees/add.tsx"),
+      route("edit/:id",  "routes/human-resources/employees/edit.tsx"),
+    ]),
     route("human-resources/contracts", "routes/placeholder/hr-contracts.tsx"),
     route("human-resources/positions", "routes/placeholder/hr-positions.tsx"),
     route("human-resources/resources", "routes/placeholder/hr-resources.tsx"),

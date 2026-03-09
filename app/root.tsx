@@ -12,7 +12,21 @@ import { AuthProvider } from "./lib/auth-context";
 import { ThemeProvider } from "./lib/theme-context";
 import { LoadingProvider } from "./lib/loading-context";
 import PaceLoader from "./components/PaceLoader";
+import { PrimeReactProvider, addLocale } from "primereact/api";
 import "./app.css";
+
+addLocale("es", {
+  firstDayOfWeek: 1,
+  dayNames: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+  dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
+  dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
+  monthNames: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+  monthNamesShort: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+  today: "Hoy",
+  clear: "Limpiar",
+});
+
+const primeConfig = { locale: "es" as const };
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,14 +56,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <ThemeProvider>
-          <LoadingProvider>
-            <AuthProvider>
-              <PaceLoader />
-              {children}
-            </AuthProvider>
-          </LoadingProvider>
-        </ThemeProvider>
+        <PrimeReactProvider value={primeConfig}>
+          <ThemeProvider>
+            <LoadingProvider>
+              <AuthProvider>
+                <PaceLoader />
+                {children}
+              </AuthProvider>
+            </LoadingProvider>
+          </ThemeProvider>
+        </PrimeReactProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

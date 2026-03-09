@@ -27,26 +27,28 @@ New-Item -ItemType Directory -Force "app/features/{feature}"
    export * from "./{feature}.service";
    ```
 
-## Paso 2 — Crear las rutas en `routes/system/{feature}/`
+## Paso 2 — Crear las rutas en `routes/{module}/{feature}/`
+
+Nota: `{module}` debe coincidir con los grupos en `app/data/menu.json` (ej. `system`, `human-resources`, `masters`, etc.).
 
 // turbo
 5. Crear las carpetas:
 ```powershell
-New-Item -ItemType Directory -Force "app/routes/system/{feature}"
+New-Item -ItemType Directory -Force "app/routes/{module}/{feature}"
 ```
 
-6. Crear `app/routes/system/{feature}/page.tsx`:
+6. Crear `app/routes/{module}/{feature}/page.tsx`:
    - Exportar `clientLoader` que llama al servicio
    - Componente recibe `{ loaderData }: Route.ComponentProps`
    - Usar `useRevalidator` para refrescar, NO `useEffect`
-   - Usar `useMatch` para detectar rutas hijo (add/edit)
+   - Usar `useMatch` para detectar rutas hijo (add/edit) ej: `useMatch("/{module}/{feature}/add")`
    - `DpTable` con prop `data={loaderData.items}` y `loading={isLoading}`
 
-7. Crear `app/routes/system/{feature}/add.tsx` — solo `meta()` + `return null`
+7. Crear `app/routes/{module}/{feature}/add.tsx` — solo `meta()` + `return null`
 
-8. Crear `app/routes/system/{feature}/edit.tsx` — solo `meta()` + `return null`
+8. Crear `app/routes/{module}/{feature}/edit.tsx` — solo `meta()` + `return null`
 
-9. Crear `app/routes/system/{feature}/Set{Feature}Dialog.tsx`:
+9. Crear `app/routes/{module}/{feature}/Set{Feature}Dialog.tsx`:
    - Importar `useNavigation` de `react-router`
    - `const isNavigating = navigation.state !== "idle"`
    - `<DpContentSet saving={saving || isNavigating} saveDisabled={!valid || isNavigating}>`
@@ -56,9 +58,9 @@ New-Item -ItemType Directory -Force "app/routes/system/{feature}"
 
 10. Agregar a `app/routes.ts`:
     ```typescript
-    route("system/{feature}", "routes/system/{feature}/page.tsx", [
-      route("add",      "routes/system/{feature}/add.tsx"),
-      route("edit/:id", "routes/system/{feature}/edit.tsx"),
+    route("{module}/{feature}", "routes/{module}/{feature}/page.tsx", [
+      route("add",      "routes/{module}/{feature}/add.tsx"),
+      route("edit/:id", "routes/{module}/{feature}/edit.tsx"),
     ]),
     ```
 

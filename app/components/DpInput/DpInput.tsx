@@ -2,8 +2,41 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
+import { Calendar } from "primereact/calendar";
 import type { DropdownChangeEvent } from "primereact/dropdown";
 import type { ChangeEvent } from "react";
+
+/** Convierte string YYYY-MM-DD a Date (mediodía local para evitar problemas de zona). */
+function parseDateString(s: string): Date | null {
+  if (!s?.trim()) return null;
+  return new Date(s.trim() + "T12:00:00");
+}
+
+/** Convierte Date a string YYYY-MM-DD. */
+function formatDateToValue(d: Date | null): string {
+  if (!d) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Convierte string YYYY-MM-DDTHH:mm o YYYY-MM-DDTHH:mm:ss a Date (local). */
+function parseDateTimeString(s: string): Date | null {
+  if (!s?.trim()) return null;
+  return new Date(s.trim());
+}
+
+/** Convierte Date a string YYYY-MM-DDTHH:mm. */
+function formatDateTimeToValue(d: Date | null): string {
+  if (!d) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${y}-${m}-${day}T${h}:${min}`;
+}
 
 const labelClass = "font-medium text-zinc-700 dark:text-zinc-300";
 const controlClass = "w-full";
@@ -14,6 +47,8 @@ export type DpInputType =
   | "number"
   | "select"
   | "check"
+  | "date"
+  | "datetime"
   | "textarea";
 
 export interface DpInputOption {
@@ -61,11 +96,27 @@ export interface DpInputCheckProps extends DpInputPropsBase {
   onChange: (value: boolean) => void;
 }
 
+export interface DpInputDateProps extends DpInputPropsBase {
+  type: "date";
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export interface DpInputDatetimeProps extends DpInputPropsBase {
+  type: "datetime";
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
 export type DpInputProps =
   | DpInputInputProps
   | DpInputInputDecimalProps
   | DpInputSelectProps
-  | DpInputCheckProps;
+  | DpInputCheckProps
+  | DpInputDateProps
+  | DpInputDatetimeProps;
 
 function getInputId(name: string | undefined, label: string): string {
   return name ?? label.replace(/\s+/g, "-").toLowerCase();
@@ -102,6 +153,54 @@ export default function DpInput(props: DpInputProps) {
           placeholder={placeholder}
           filter={filter}
           disabled={disabled}
+          className={controlClass}
+        />
+      </div>
+    );
+  }
+
+  if (props.type === "date") {
+    const { value, onChange, placeholder } = props;
+    const dateValue = parseDateString(value);
+    return (
+      <div className={`${wrapperClass} ${className}`.trim()}>
+        <label htmlFor={id} className={labelClass}>
+          {label}
+        </label>
+        <Calendar
+          id={id}
+          value={dateValue}
+          onChange={(e) => onChange(formatDateToValue(e.value as Date | null))}
+          dateFormat="dd/mm/yy"
+          locale="es"
+          placeholder={placeholder}
+          disabled={disabled}
+          showIcon
+          className={controlClass}
+        />
+      </div>
+    );
+  }
+
+  if (props.type === "datetime") {
+    const { value, onChange, placeholder } = props;
+    const dateValue = parseDateTimeString(value);
+    return (
+      <div className={`${wrapperClass} ${className}`.trim()}>
+        <label htmlFor={id} className={labelClass}>
+          {label}
+        </label>
+        <Calendar
+          id={id}
+          value={dateValue}
+          onChange={(e) => onChange(formatDateTimeToValue(e.value as Date | null))}
+          dateFormat="dd/mm/yy"
+          showTime
+          hourFormat="24"
+          locale="es"
+          placeholder={placeholder}
+          disabled={disabled}
+          showIcon
           className={controlClass}
         />
       </div>

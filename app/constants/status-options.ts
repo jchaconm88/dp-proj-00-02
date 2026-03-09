@@ -25,3 +25,17 @@ export const RESET_PERIOD: Record<string, StatusOption> = {
   monthly: { label: "Mensual", severity: "info" },
   daily: { label: "Diario", severity: "info" },
 };
+
+/** Estado de empleados. */
+export const EMPLOYEE_STATUS: Record<string, StatusOption> = {
+  active:    { label: "Activo",    severity: "success"   },
+  inactive:  { label: "Inactivo",  severity: "secondary" },
+  suspended: { label: "Suspendido", severity: "warning"  },
+};
+
+/** Tipo de salario. */
+export const SALARY_TYPE: Record<string, StatusOption> = {
+  monthly: { label: "Mensual", severity: "info" },
+  weekly:  { label: "Semanal", severity: "info" },
+  daily:   { label: "Diario",  severity: "info" },
+};
