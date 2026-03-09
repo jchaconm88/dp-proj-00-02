@@ -1,3 +1,37 @@
-import { type RouteConfig, index } from "@react-router/dev/routes";
+import {
+  type RouteConfig,
+  index,
+  layout,
+  route,
+} from "@react-router/dev/routes";
 
-export default [index("routes/home.tsx")] satisfies RouteConfig;
+export default [
+  index("routes/home.tsx"),
+  route("login", "routes/login.tsx"),
+  route("registro", "routes/registro.tsx"),
+  layout("routes/dashboard.tsx", [
+    route("home", "routes/dashboard-home.tsx"),
+    route("system/users", "routes/users.tsx"),
+    route("system/roles", "routes/roles.tsx"),
+    route("system/roles/:id", "routes/roles.$id.tsx"),
+    route("system/modules", "routes/modules.tsx"),
+    route("system/modules/:id", "routes/modules.$id.tsx"),
+    route("system/sequences", "routes/placeholder/system-sequences.tsx"),
+    route("system/counters", "routes/placeholder/system-counters.tsx"),
+    route("masters/document-types", "routes/placeholder/masters-document-types.tsx"),
+    route("masters/documents", "routes/placeholder/masters-documents.tsx"),
+    route("masters/clients", "routes/placeholder/masters-clients.tsx"),
+    route("human-resources/employees", "routes/placeholder/hr-employees.tsx"),
+    route("human-resources/contracts", "routes/placeholder/hr-contracts.tsx"),
+    route("human-resources/positions", "routes/placeholder/hr-positions.tsx"),
+    route("human-resources/resources", "routes/placeholder/hr-resources.tsx"),
+    route("logistics/orders", "routes/placeholder/logistics-orders.tsx"),
+    route("transport/transport-services", "routes/placeholder/transport-services.tsx"),
+    route("transport/transport-contracts", "routes/placeholder/transport-contracts.tsx"),
+    route("transport/vehicles", "routes/placeholder/transport-vehicles.tsx"),
+    route("transport/drivers", "routes/placeholder/transport-drivers.tsx"),
+    route("transport/plans", "routes/placeholder/transport-plans.tsx"),
+    route("transport/routes", "routes/placeholder/transport-routes.tsx"),
+    route("transport/trips", "routes/placeholder/transport-trips.tsx"),
+  ]),
+] satisfies RouteConfig;

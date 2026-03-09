@@ -8,6 +8,10 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { AuthProvider } from "./lib/auth-context";
+import { ThemeProvider } from "./lib/theme-context";
+import { LoadingProvider } from "./lib/loading-context";
+import PaceLoader from "./components/PaceLoader";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -25,15 +29,27 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('app-theme');if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');})();`,
+          }}
+        />
         <Meta />
         <Links />
       </head>
       <body>
-        {children}
+        <ThemeProvider>
+          <LoadingProvider>
+            <AuthProvider>
+              <PaceLoader />
+              {children}
+            </AuthProvider>
+          </LoadingProvider>
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
