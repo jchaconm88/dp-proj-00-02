@@ -36,7 +36,14 @@ export default [
       route("add",       "routes/human-resource/positions/add.tsx"),
       route("edit/:id",  "routes/human-resource/positions/edit.tsx"),
     ]),
-    route("human-resource/resources", "routes/placeholder/hr-resources.tsx"),
+    route("human-resource/resources", "routes/human-resource/resources/page.tsx", [
+      route("add",       "routes/human-resource/resources/add.tsx"),
+      route("edit/:id",  "routes/human-resource/resources/edit.tsx"),
+    ]),
+    route("human-resource/resources/:id/costs", "routes/human-resource/resources/costs.tsx", [
+      route("add",            "routes/human-resource/resources/costs-add.tsx"),
+      route("edit/:costId",   "routes/human-resource/resources/costs-edit.tsx"),
+    ]),
     route("logistic/orders",          "routes/placeholder/logistic-orders.tsx"),
     route("transport/transport-services",  "routes/placeholder/transport-services.tsx"),
     route("transport/transport-contracts", "routes/placeholder/transport-contracts.tsx"),

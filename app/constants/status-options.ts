@@ -39,3 +39,31 @@ export const SALARY_TYPE: Record<string, StatusOption> = {
   weekly:  { label: "Semanal", severity: "info" },
   daily:   { label: "Diario",  severity: "info" },
 };
+
+/** Estado de recursos externos. */
+export const RESOURCE_STATUS: Record<string, StatusOption> = {
+  active:    { label: "Activo",    severity: "success"   },
+  inactive:  { label: "Inactivo",  severity: "secondary" },
+  suspended: { label: "Suspendido", severity: "warning"  },
+};
+
+/** Tipo de vinculación remota. */
+export const RESOURCE_ENGAGEMENT_TYPE: Record<string, StatusOption> = {
+  sporadic:  { label: "Esporádico",  severity: "info" },
+  permanent: { label: "Permanente", severity: "info" },
+  contract:  { label: "Contrato",    severity: "info" },
+};
+
+/** Tipo de costo de recurso. */
+export const RESOURCE_COST_TYPE: Record<string, StatusOption> = {
+  per_trip: { label: "Por viaje", severity: "info" },
+  per_hour: { label: "Por hora", severity: "info" },
+  per_day:  { label: "Por día", severity: "info" },
+  fixed:    { label: "Fijo", severity: "info" },
+};
+
+/** Moneda. */
+export const CURRENCY: Record<string, StatusOption> = {
+  PEN: { label: "Soles (PEN)", severity: "success" },
+  USD: { label: "Dólares (USD)", severity: "success" },
+};
