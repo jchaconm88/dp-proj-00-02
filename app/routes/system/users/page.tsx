@@ -1,11 +1,11 @@
-﻿import { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigation, useRevalidator } from "react-router";
 import {
   deleteProfile,
   getProfiles,
   saveProfile,
   type ProfileRecord,
-} from "~/features/users";
+} from "~/features/system/users";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
@@ -49,7 +49,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
   const handleDeleteSelected = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
     if (selected.length === 0) return;
-    if (!confirm(`¿Eliminar ${selected.length} usuario(s)?`)) return;
+    if (!confirm(`Â¿Eliminar ${selected.length} usuario(s)?`)) return;
     try {
       await Promise.all(selected.map((u) => deleteProfile(u.id)));
       tableRef.current?.clearSelectedRows();
@@ -96,7 +96,7 @@ export default function Users({ loaderData }: Route.ComponentProps) {
         </div>
       )}
 
-      {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
+      {/* data prop: modo controlado â€” se actualiza automáticamente con cada revalidación */}
       <DpTable<ProfileRecord>
         ref={tableRef}
         data={loaderData.users}

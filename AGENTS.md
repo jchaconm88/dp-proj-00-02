@@ -9,10 +9,11 @@ Este proyecto es una SPA de administración construida con **React Router v7 (fr
 ```
 app/
 ├── features/          ← lógica de dominio (tipos + servicios)
-│   ├── {feature}/
-│   │   ├── {feature}.types.ts    ← interfaces/types SOLO
-│   │   ├── {feature}.service.ts  ← funciones CRUD/Firestore
-│   │   └── index.ts              ← barrel: export * from types + service
+│   ├── {module}/      ← agrupado por módulo (system, human-resource, master, logistic, transport)
+│   │   ├── {feature}/
+│   │   │   ├── {feature}.types.ts    ← interfaces/types SOLO
+│   │   │   ├── {feature}.service.ts  ← funciones CRUD/Firestore
+│   │   │   └── index.ts              ← barrel: export * from types + service
 ├── routes/
 │   ├── dashboard.tsx             ← layout protegido (auth en clientLoader)
 │   ├── {module}/                 ← agrupado por módulo según menu.json (system, human-resources, etc.)
@@ -68,7 +69,7 @@ useEffect(() => { fetchItems(); }, []);
 
 ---
 
-## 3. Importar de `features/` (NO de `lib/firestore-*`)
+## 3. Importar de `features/` y usar abstracciones de Firestore
 
 ```tsx
 // ✅ CORRECTO — usar barrel index de la feature
@@ -83,10 +84,10 @@ import { getSequences } from "~/lib/firestore-sequences";
 
 ## 4. Agregar una Feature Nueva
 
-### 4.1 Paso 1 — Crear `features/{feature}/`
+### 4.1 Paso 1 — Crear `features/{module}/{feature}/`
 
 ```typescript
-// features/{feature}/{feature}.types.ts
+// features/{module}/{feature}/{feature}.types.ts
 export interface {Feature}Record {
   id: string;
   // ... campos del dominio
@@ -94,8 +95,8 @@ export interface {Feature}Record {
 export interface {Feature}AddInput { ... }
 export type {Feature}EditInput = Partial<Omit<{Feature}Record, "id">>;
 
-// features/{feature}/{feature}.service.ts
-import { db } from "~/lib/firebase";
+// features/{module}/{feature}/{feature}.service.ts
+import { getCollection, addDocument, updateDocument, deleteDocument } from "~/lib/firestore.service";
 import type { {Feature}Record, {Feature}AddInput } from "./{feature}.types";
 
 export async function get{Feature}s(): Promise<{ items: {Feature}Record[] }> { ... }
@@ -103,19 +104,19 @@ export async function add{Feature}(data: {Feature}AddInput): Promise<string> { .
 export async function update{Feature}(id: string, data: ...): Promise<void> { ... }
 export async function delete{Feature}(id: string): Promise<void> { ... }
 
-// features/{feature}/index.ts
+// features/{module}/{feature}/index.ts
 export * from "./{feature}.types";
 export * from "./{feature}.service";
 ```
 
 ### 4.2 Paso 2 — Crear rutas en `routes/{module}/{feature}/`
 
-Nota: `{module}` debe coincidir con los grupos definidos en `app/data/menu.json` (ej: `system`, `human-resources`, `masters`, `logistics`, `transport`).
+Nota: `{module}` debe coincidir con los grupos definidos en `app/data/menu.json` (ej: `system`, `human-resource`, `master`, `logistic`, `transport`).
 
 **`page.tsx`** — lista principal:
 ```tsx
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
-import { get{Feature}s, delete{Feature} } from "~/features/{feature}";
+import { get{Feature}s, delete{Feature} } from "~/features/{module}/{feature}";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
@@ -235,3 +236,4 @@ export async function clientLoader() {
 - **`meta()` en todas las rutas** — incluidas las rutas hijo (add/edit)
 - **TypeScript estricto** — tipar todos los parámetros y retornos de servicios
 - **Rutas configuradas en `routes.ts`** — NUNCA dependas del naming del archivo para el routing
+- **Firestore Service** — NUNCA importar `firebase/firestore` directamente en los .service.ts. Se deben usar OBLIGATORIAMENTE las funciones expuestas en `~/lib/firestore.service.ts` (`getDocument`, `addDocument`, `updateDocument`, etc.) ya que éstas inyectan campos de auditoría automáticamente de forma segura.

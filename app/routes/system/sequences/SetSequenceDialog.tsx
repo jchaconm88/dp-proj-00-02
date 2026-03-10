@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
@@ -7,7 +7,7 @@ import {
   addSequence,
   updateSequence,
   type ResetPeriod,
-} from "~/features/sequences";
+} from "~/features/system/sequences";
 import { RESET_PERIOD, statusToSelectOptions } from "~/constants/status-options";
 
 export interface SetSequenceDialogProps {
@@ -131,7 +131,7 @@ export default function SetSequenceDialog({
       onHide={onHide}
     >
       {loading ? (
-        <div className="py-8 text-center text-zinc-500">Cargando…</div>
+        <div className="py-8 text-center text-zinc-500">Cargandoâ€¦</div>
       ) : (
         <div className="flex flex-col gap-4 pt-2">
           {error && (

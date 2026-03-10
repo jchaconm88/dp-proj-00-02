@@ -1,26 +1,10 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  query,
-  updateDoc,
-  serverTimestamp,
-  runTransaction,
-  where,
-} from "firebase/firestore";
-import { auth, db } from "~/lib/firebase";
+import { getDocument, getCollection, getFirst, addDocument, updateDocument, deleteDocument, runTransaction, getDocRef } from "~/lib/firestore.service";
 import type { ResetPeriod, SequenceRecord, SequenceAddInput, SequenceEditInput } from "./sequences.types";
 
 const COLLECTION = "sequences";
 const COUNTERS_COLLECTION = "counters";
 
-function getCurrentUserEmail(): string | null {
-  return auth.currentUser?.email ?? null;
-}
+
 
 type SequenceDoc = Record<string, unknown>;
 
@@ -42,28 +26,25 @@ function toSequenceRecord(id: string, data: SequenceDoc): SequenceRecord {
 }
 
 export async function getSequenceById(id: string): Promise<SequenceRecord | null> {
-  const snap = await getDoc(doc(db, COLLECTION, id));
-  if (!snap.exists()) return null;
-  return toSequenceRecord(snap.id, snap.data() as SequenceDoc);
+  const snap = await getDocument<SequenceDoc>(COLLECTION, id);
+  if (!snap) return null;
+  return toSequenceRecord(snap.id, snap);
 }
 
 export async function getSequences(): Promise<{ items: SequenceRecord[]; last: null }> {
-  const q = query(collection(db, COLLECTION), limit(200));
-  const snap = await getDocs(q);
-  const items = snap.docs.map((d) => toSequenceRecord(d.id, d.data() as SequenceDoc));
+  const rows = await getCollection<SequenceDoc>(COLLECTION, 200);
+  const items = rows.map((d) => toSequenceRecord(d.id, d));
   items.sort((a, b) => a.entity.localeCompare(b.entity));
   return { items, last: null };
 }
 
 export async function getActiveSequenceByEntity(entity: string): Promise<SequenceRecord | null> {
-  const q = query(collection(db, COLLECTION), where("entity", "==", entity), limit(10));
-  const snap = await getDocs(q);
-  const found = snap.docs.find((d) => d.data().active !== false);
-  return found ? toSequenceRecord(found.id, found.data() as SequenceDoc) : null;
+  const snap = await getFirst<SequenceDoc>(COLLECTION, "entity", entity);
+  return snap && snap.active !== false ? toSequenceRecord(snap.id, snap) : null;
 }
 
 export async function addSequence(data: SequenceAddInput): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTION), {
+  return addDocument(COLLECTION, {
     entity: data.entity.trim(),
     prefix: (data.prefix ?? "").trim(),
     digits: Number(data.digits) || 6,
@@ -72,10 +53,7 @@ export async function addSequence(data: SequenceAddInput): Promise<string> {
     allowManualOverride: !!data.allowManualOverride,
     preventGaps: !!data.preventGaps,
     active: data.active !== false,
-    createBy: getCurrentUserEmail() ?? undefined,
-    createAt: serverTimestamp(),
   });
-  return ref.id;
 }
 
 export async function updateSequence(id: string, data: SequenceEditInput): Promise<void> {
@@ -88,16 +66,14 @@ export async function updateSequence(id: string, data: SequenceEditInput): Promi
   if (data.allowManualOverride !== undefined) payload.allowManualOverride = data.allowManualOverride;
   if (data.preventGaps !== undefined) payload.preventGaps = data.preventGaps;
   if (data.active !== undefined) payload.active = data.active;
-  payload.updateBy = getCurrentUserEmail() ?? undefined;
-  payload.updateAt = serverTimestamp();
-  await updateDoc(doc(db, COLLECTION, id), payload);
+  await updateDocument(COLLECTION, id, payload);
 }
 
 export async function deleteSequence(id: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, id));
+  await deleteDocument(COLLECTION, id);
 }
 
-// ── Utilidades de numeración ───────────────────────────────────────────────
+// â”€â”€ Utilidades de numeración â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export function makeCounterId(sequenceId: string, period: string): string {
   const safe = String(period ?? "").replace(/\//g, "-").trim() || "all";
@@ -130,8 +106,8 @@ export async function generateNumber(entity: string): Promise<string> {
   const period = getCurrentPeriod(sequence.resetPeriod);
   const counterId = makeCounterId(sequence.id, period);
 
-  const nextNumber = await runTransaction(db, async (transaction) => {
-    const ref = doc(db, COUNTERS_COLLECTION, counterId);
+  const nextNumber = await runTransaction(async (transaction, firestoreDb) => {
+    const ref = getDocRef(COUNTERS_COLLECTION, counterId);
     const snap = await transaction.get(ref);
     let next: number;
     if (!snap.exists()) {

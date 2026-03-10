@@ -1,6 +1,6 @@
-﻿import { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator } from "react-router";
-import { getModules, deleteModule, type ModuleRecord } from "~/features/modules";
+import { getModules, deleteModule, type ModuleRecord } from "~/features/system/modules";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
@@ -61,7 +61,7 @@ export default function Modules({ loaderData }: Route.ComponentProps) {
   const handleDeleteSelected = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
     if (selected.length === 0) return;
-    if (!confirm(`¿Eliminar ${selected.length} módulo(s)?`)) return;
+    if (!confirm(`Â¿Eliminar ${selected.length} módulo(s)?`)) return;
     setSaving(true);
     setError(null);
     try {
@@ -94,7 +94,7 @@ export default function Modules({ loaderData }: Route.ComponentProps) {
         </div>
       )}
 
-      {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
+      {/* data prop: modo controlado â€” se actualiza automáticamente con cada revalidación */}
       <DpTable<ModuleRecord>
         ref={tableRef}
         data={loaderData.modules}

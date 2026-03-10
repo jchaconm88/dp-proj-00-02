@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
-import { getEmployees, deleteEmployee, type EmployeeRecord } from "~/features/employees";
+import { getEmployees, deleteEmployee, deleteEmployees, type EmployeeRecord } from "~/features/human-resource/employees";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
@@ -30,8 +30,8 @@ export async function clientLoader() {
   const { items } = await getEmployees();
   const rows: EmployeeRow[] = items.map((e) => ({
     ...e,
-    fullName: `${e.firstName} ${e.lastName}`.trim() || "—",
-    salaryDisplay: e.payroll ? `${e.payroll.baseSalary} ${e.payroll.currency}` : "—",
+    fullName: `${e.firstName} ${e.lastName}`.trim() || "—",
+    salaryDisplay: e.payroll ? `${e.payroll.baseSalary} ${e.payroll.currency}` : "—",
   }));
   return { rows };
 }
@@ -43,8 +43,8 @@ export default function EmployeesPage({ loaderData }: Route.ComponentProps) {
   const tableRef = useRef<DpTableRef<EmployeeRow>>(null);
 
   const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
-  const isAdd = !!useMatch("/human-resources/employees/add");
-  const editMatch = useMatch("/human-resources/employees/edit/:id");
+  const isAdd = !!useMatch("/human-resource/employees/add");
+  const editMatch = useMatch("/human-resource/employees/edit/:id");
   const editId = editMatch?.params.id ?? null;
 
   const [saving, setSaving] = useState(false);
@@ -59,9 +59,9 @@ export default function EmployeesPage({ loaderData }: Route.ComponentProps) {
     tableRef.current?.filter(value);
   };
 
-  const openAdd = () => navigate("/human-resources/employees/add");
+  const openAdd = () => navigate("/human-resource/employees/add");
   const openEdit = (row: EmployeeRow) =>
-    navigate(`/human-resources/employees/edit/${encodeURIComponent(row.id)}`);
+    navigate(`/human-resource/employees/edit/${encodeURIComponent(row.id)}`);
 
   const handleDelete = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
@@ -69,7 +69,7 @@ export default function EmployeesPage({ loaderData }: Route.ComponentProps) {
     setSaving(true);
     setError(null);
     try {
-      await Promise.all(selected.map((r) => deleteEmployee(r.id)));
+      await deleteEmployees(selected.map((r) => r.id));
       tableRef.current?.clearSelectedRows();
       revalidator.revalidate();
     } catch (err) {
@@ -80,11 +80,11 @@ export default function EmployeesPage({ loaderData }: Route.ComponentProps) {
   };
 
   const handleSuccess = () => {
-    navigate("/human-resources/employees");
+    navigate("/human-resource/employees");
     revalidator.revalidate();
   };
 
-  const handleHide = () => navigate("/human-resources/employees");
+  const handleHide = () => navigate("/human-resource/employees");
 
   return (
     <DpContent title="EMPLEADOS">

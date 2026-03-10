@@ -1,6 +1,6 @@
-﻿import { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useMatch, Outlet, useNavigation, useRevalidator } from "react-router";
-import { getSequences, deleteSequence, type SequenceRecord } from "~/features/sequences";
+import { getSequences, deleteSequence, type SequenceRecord } from "~/features/system/sequences";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
@@ -53,7 +53,7 @@ export default function Sequences({ loaderData }: Route.ComponentProps) {
   // Loading unificado: navegación entre rutas + revalidaciones
   const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
 
-  // Detección de diálogo activo por URL — useMatch es la API oficial de RR v7
+  // Detección de diálogo activo por URL â€” useMatch es la API oficial de RR v7
   const addMatch = useMatch("/system/sequences/add");
   const editMatch = useMatch("/system/sequences/edit/:id");
   const isAdd = !!addMatch;
@@ -76,7 +76,7 @@ export default function Sequences({ loaderData }: Route.ComponentProps) {
   const handleDeleteSelected = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
     if (selected.length === 0) return;
-    if (!confirm(`¿Eliminar ${selected.length} secuencia(s)?`)) return;
+    if (!confirm(`Â¿Eliminar ${selected.length} secuencia(s)?`)) return;
     setSaving(true);
     setError(null);
     try {
@@ -110,7 +110,7 @@ export default function Sequences({ loaderData }: Route.ComponentProps) {
           </div>
         )}
 
-        {/* data prop: modo controlado — se actualiza automáticamente con cada revalidación */}
+        {/* data prop: modo controlado â€” se actualiza automáticamente con cada revalidación */}
         <DpTable<SequenceRecord>
           ref={tableRef}
           data={loaderData.sequences}

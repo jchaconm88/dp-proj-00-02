@@ -1,10 +1,10 @@
-﻿import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate, redirect } from "react-router";
 import { useAuth } from "~/lib/auth-context";
 import { useTheme } from "~/lib/theme-context";
 import type { Route } from "./+types/dashboard";
 import menuData from "~/data/menu.json";
-import { getAllRoles, type RoleRecord } from "~/features/roles";
+import { getAllRoles, type RoleRecord } from "~/features/system/roles";
 import { isGranted } from "~/lib/accessService";
 import { Dropdown } from "primereact/dropdown";
 import { getAuthUser } from "~/lib/get-auth-user";
@@ -110,7 +110,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 
   const roleIds = profile?.roleIds ?? ["user"];
 
-  // Roles cargados desde clientLoader — sin useEffect ni estado manual
+  // Roles cargados desde clientLoader â€” sin useEffect ni estado manual
   const effectivePermissions = useMemo(
     () => getEffectivePermissions(roleIds, loaderData.roles),
     [roleIds, loaderData.roles]
@@ -164,7 +164,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 
   // clientLoader ya garantizó que hay usuario autenticado antes de renderizar.
   // Este guard cubre el breve instante inicial en que AuthProvider aún no actualizó su estado React.
-  // PaceLoader muestra el indicador visual durante el clientLoader — sin spinner propio aquí.
+  // PaceLoader muestra el indicador visual durante el clientLoader â€” sin spinner propio aquí.
   if (!user) return null;
 
   return (

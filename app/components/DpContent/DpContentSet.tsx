@@ -49,7 +49,7 @@ function FooterButtons({
       />
       <Button
         type="button"
-        label={saving ? "Guardando…" : saveLabel}
+        label={saving ? "Guardandoâ€¦" : saveLabel}
         onClick={onSave}
         disabled={saving || saveDisabled}
         loading={saving}

@@ -1,16 +1,4 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  query,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { auth, db } from "~/lib/firebase";
+import { getDocument, getCollection, addDocument, updateDocument, deleteDocument, deleteManyDocuments } from "~/lib/firestore.service";
 import type {
   EmployeeRecord,
   EmployeeAddInput,
@@ -23,9 +11,7 @@ import type {
 
 const COLLECTION = "employees";
 
-function getCurrentUserEmail(): string | null {
-  return auth.currentUser?.email ?? null;
-}
+
 
 type EmployeeDoc = Record<string, unknown>;
 
@@ -81,15 +67,14 @@ function toEmployeeRecord(id: string, data: EmployeeDoc): EmployeeRecord {
 }
 
 export async function getEmployeeById(id: string): Promise<EmployeeRecord | null> {
-  const snap = await getDoc(doc(db, COLLECTION, id));
-  if (!snap.exists()) return null;
-  return toEmployeeRecord(snap.id, snap.data() as EmployeeDoc);
+  const snap = await getDocument<EmployeeDoc>(COLLECTION, id);
+  if (!snap) return null;
+  return toEmployeeRecord(snap.id, snap);
 }
 
 export async function getEmployees(): Promise<{ items: EmployeeRecord[]; last: null }> {
-  const q = query(collection(db, COLLECTION), limit(200));
-  const snap = await getDocs(q);
-  const items = snap.docs.map((d) => toEmployeeRecord(d.id, d.data() as EmployeeDoc));
+  const rows = await getCollection<EmployeeDoc>(COLLECTION, 200);
+  const items = rows.map((d) => toEmployeeRecord(d.id, d));
   items.sort((a, b) =>
     `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
   );
@@ -97,7 +82,7 @@ export async function getEmployees(): Promise<{ items: EmployeeRecord[]; last: n
 }
 
 export async function addEmployee(data: EmployeeAddInput): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTION), {
+  return addDocument(COLLECTION, {
     code: data.code.trim(),
     firstName: data.firstName.trim(),
     lastName: data.lastName.trim(),
@@ -119,10 +104,7 @@ export async function addEmployee(data: EmployeeAddInput): Promise<string> {
       gratification: data.benefits.gratification === true,
       vacationDays: Number(data.benefits.vacationDays) || 0,
     },
-    createBy: getCurrentUserEmail() ?? undefined,
-    createAt: serverTimestamp(),
   });
-  return ref.id;
 }
 
 export async function updateEmployee(id: string, data: EmployeeEditInput): Promise<void> {
@@ -152,11 +134,13 @@ export async function updateEmployee(id: string, data: EmployeeEditInput): Promi
       vacationDays: Number(data.benefits.vacationDays) || 0,
     };
   }
-  payload.updateBy = getCurrentUserEmail() ?? undefined;
-  payload.updateAt = serverTimestamp();
-  await updateDoc(doc(db, COLLECTION, id), payload);
+  await updateDocument(COLLECTION, id, payload);
 }
 
 export async function deleteEmployee(id: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, id));
+  await deleteDocument(COLLECTION, id);
+}
+
+export async function deleteEmployees(ids: string[]): Promise<void> {
+  await deleteManyDocuments(COLLECTION, ids);
 }

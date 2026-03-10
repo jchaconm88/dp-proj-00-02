@@ -93,7 +93,7 @@ export default function Registro() {
             disabled={loading}
             className="w-full rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3 font-medium hover:opacity-90 disabled:opacity-50 transition"
           >
-            {loading ? "Creando cuenta…" : "Registrarse"}
+            {loading ? "Creando cuenta..." : "Registrarse"}
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">

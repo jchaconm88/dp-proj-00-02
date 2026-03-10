@@ -1,12 +1,12 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { Checkbox } from "primereact/checkbox";
 import { MultiSelect } from "primereact/multiselect";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { updateRole, type RolePermissions } from "~/features/roles";
-import { getModules, getModule } from "~/features/modules";
-import type { ModuleRecord, ModulePermission } from "~/features/modules";
+import { updateRole, type RolePermissions } from "~/features/system/roles";
+import { getModules, getModule } from "~/features/system/modules";
+import type { ModuleRecord, ModulePermission } from "~/features/system/modules";
 
 export interface SetRolePermissionDialogProps {
   visible: boolean;

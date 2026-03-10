@@ -49,7 +49,7 @@ export interface DpTableProps<T extends DpTableRow> {
 function getCellValue(row: Record<string, unknown>, columnKey: string): unknown {
   const value = row[columnKey];
   if (Array.isArray(value)) return value.join(", ");
-  return value ?? "—";
+  return value ?? "â€”";
 }
 
 function parseDate(value: unknown): Date | null {
@@ -63,13 +63,13 @@ function parseDate(value: unknown): Date | null {
 
 function formatDateValue(value: unknown): string {
   const d = parseDate(value);
-  if (!d) return value != null && value !== "" ? String(value) : "—";
+  if (!d) return value != null && value !== "" ? String(value) : "â€”";
   return format(d, "dd/MM/yyyy");
 }
 
 function formatDateTimeValue(value: unknown): string {
   const d = parseDate(value);
-  if (!d) return value != null && value !== "" ? String(value) : "—";
+  if (!d) return value != null && value !== "" ? String(value) : "â€”";
   return format(d, "dd/MM/yyyy HH:mm:ss");
 }
 
@@ -121,7 +121,7 @@ function DpTableInner<T extends DpTableRow>(
     linkColumn,
     onDetail,
     onEdit,
-    filterPlaceholder = "Filtrar…",
+    filterPlaceholder = "Filtrarâ€¦",
     showFilterInHeader = true,
     pageSizes = DEFAULT_PAGE_SIZES,
     emptyMessage = "No hay datos.",
@@ -131,9 +131,9 @@ function DpTableInner<T extends DpTableRow>(
   }: DpTableProps<T>,
   ref: React.ForwardedRef<DpTableRef<T>>
 ) {
-  // Estado interno de filas — se alimenta por prop `data` o por la API imperativa ref.setDatasource()
+  // Estado interno de filas â€” se alimenta por prop `data` o por la API imperativa ref.setDatasource()
   const [rows, setRows] = useState<T[]>(dataProp ?? []);
-  // Estado interno de loading — se alimenta por prop `loading` o por ref.setLoading()
+  // Estado interno de loading â€” se alimenta por prop `loading` o por ref.setLoading()
   const [internalLoading, setInternalLoading] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [selection, setSelection] = useState<T[]>([]);
@@ -143,12 +143,12 @@ function DpTableInner<T extends DpTableRow>(
     selectionRef.current = selection;
   }, [selection]);
 
-  // Modo controlado: sincroniza datos externos → estado interno cuando cambia `data` prop
+  // Modo controlado: sincroniza datos externos â†’ estado interno cuando cambia `data` prop
   useEffect(() => {
     if (dataProp !== undefined) setRows(dataProp);
   }, [dataProp]);
 
-  // Loading efectivo: la prop externa tiene precedencia — permite control desde useNavigation/useRevalidator
+  // Loading efectivo: la prop externa tiene precedencia â€” permite control desde useNavigation/useRevalidator
   const effectiveLoading = loadingProp !== undefined ? loadingProp : internalLoading;
 
   const columns = useMemo(
@@ -162,7 +162,7 @@ function DpTableInner<T extends DpTableRow>(
   const filterColumns = useMemo(() => columns.filter((c) => c.filter !== false), [columns]);
   const globalFilterFields = useMemo(() => filterColumns.map((c) => c.column), [filterColumns]);
 
-  // API imperativa — sigue funcionando para compatibilidad y casos de uso avanzados
+  // API imperativa â€” sigue funcionando para compatibilidad y casos de uso avanzados
   const setDatasource = useCallback((newData: T[]) => setRows(newData), []);
   const clearDatasource = useCallback(() => {
     setRows([]);

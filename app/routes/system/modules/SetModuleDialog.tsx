@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { addModule, saveModule, getModule } from "~/features/modules";
+import { addModule, saveModule, getModule } from "~/features/system/modules";
 
 export interface SetModuleDialogProps {
   visible: boolean;
@@ -83,7 +83,7 @@ export default function SetModuleDialog({
       onHide={onHide}
     >
       {loading ? (
-        <div className="py-8 text-center text-zinc-500">Cargando…</div>
+        <div className="py-8 text-center text-zinc-500">Cargandoâ€¦</div>
       ) : (
         <>
           {error && (

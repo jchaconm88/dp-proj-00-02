@@ -11,7 +11,7 @@ export interface StatusOption {
   severity: StatusSeverity;
 }
 
-/** Convierte un objeto de opciones (valor → { label, severity }) en array para DpInput type="select". */
+/** Convierte un objeto de opciones (valor â†’ { label, severity }) en array para DpInput type="select". */
 export function statusToSelectOptions(
   obj: Record<string, StatusOption>
 ): { label: string; value: string }[] {

@@ -9,8 +9,9 @@ import {
   updateEmployee,
   type EmployeeStatus,
   type SalaryType,
-} from "~/features/employees";
-import { resolveCodeIfEmpty } from "~/features/sequences";
+} from "~/features/human-resource/employees";
+import { resolveCodeIfEmpty } from "~/features/system/sequences";
+import { getPositions } from "~/features/human-resource/positions";
 import { EMPLOYEE_STATUS, SALARY_TYPE, statusToSelectOptions } from "~/constants/status-options";
 
 export interface SetEmployeeDialogProps {
@@ -42,6 +43,7 @@ export default function SetEmployeeDialog({
   const [email, setEmail]           = useState("");
   const [positionId, setPositionId] = useState("");
   const [position, setPosition]     = useState("");
+  const [positionsOpts, setPositionsOpts] = useState<{ label: string; value: string }[]>([]);
   const [hireDate, setHireDate]     = useState("");
   const [status, setStatus]         = useState<EmployeeStatus>("active");
   // Nómina
@@ -61,6 +63,12 @@ export default function SetEmployeeDialog({
   useEffect(() => {
     if (!visible) return;
     setError(null);
+    getPositions()
+      .then(({ items }) => {
+        setPositionsOpts(items.map((p) => ({ label: p.name, value: p.id })));
+      })
+      .catch(() => setPositionsOpts([]));
+
     if (!employeeId) {
       setCode(""); setFirstName(""); setLastName(""); setDocumentNo("");
       setDocumentId(""); setPhone(""); setEmail(""); setPositionId("");
@@ -160,7 +168,7 @@ export default function SetEmployeeDialog({
       onHide={onHide}
     >
       {loading ? (
-        <div className="py-8 text-center text-zinc-500">Cargando…</div>
+        <div className="py-8 text-center text-zinc-500">Cargando...</div>
       ) : (
         <div className="flex flex-col gap-4 pt-2">
           {error && (
@@ -176,7 +184,16 @@ export default function SetEmployeeDialog({
           <DpInput type="input"  label="Tipo doc."    name="documentId" value={documentId} onChange={setDocumentId} placeholder="DNI / RUC / Pasaporte" />
           <DpInput type="input"  label="Teléfono"     name="phone"      value={phone}      onChange={setPhone}      placeholder="999 999 999" />
           <DpInput type="input"  label="Email"        name="email"      value={email}      onChange={setEmail}      placeholder="carlos@empresa.com" />
-          <DpInput type="input"  label="Cargo"        name="position"   value={position}   onChange={setPosition}   placeholder="Conductor" />
+          <DpInput
+            type="select" label="Cargo" name="positionId"
+            value={positionId}
+            onChange={(v) => {
+              setPositionId(v as string);
+              const found = positionsOpts.find((p) => p.value === v);
+              setPosition(found ? found.label : "");
+            }}
+            options={positionsOpts}
+          />
           <DpInput type="date" label="Fecha ingreso" name="hireDate" value={hireDate} onChange={setHireDate} placeholder="DD/MM/YYYY" />
           <DpInput
             type="select" label="Estado" name="status"

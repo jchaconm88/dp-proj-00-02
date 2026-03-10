@@ -16,7 +16,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
-import { firestoreService } from "./firestore.service";
+import { createDocumentWithId } from "./firestore.service";
 
 export type UserProfile = {
   uid: string;
@@ -107,11 +107,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (email: string, password: string, displayName: string) => {
       const { user: u } = await createUserWithEmailAndPassword(auth, email, password);
-      await firestoreService.setDocument(
+      await createDocumentWithId(
         PROFILES_COLLECTION,
         u.uid,
-        { email, displayName, roleIds: ["user"] },
-        true
+        { email, displayName, roleIds: ["user"] }
       );
       await loadProfile(u.uid);
     },

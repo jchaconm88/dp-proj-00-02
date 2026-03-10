@@ -1,6 +1,4 @@
-import { firestoreService } from "~/lib/firestore.service";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db, auth } from "~/lib/firebase";
+import { getDocument, getCollection, createDocumentWithId, updateDocument, deleteDocument } from "~/lib/firestore.service";
 import type { ModuleRecord, ModuleEditInput } from "./modules.types";
 
 const COLLECTION = "modules";
@@ -43,37 +41,34 @@ function normalizeRecord(id: string, data: Record<string, unknown>): ModuleRecor
 
 /** Obtiene un módulo por ID. */
 export async function getModule(id: string): Promise<ModuleRecord | null> {
-  const snap = await getDoc(doc(db, COLLECTION, id));
-  if (!snap.exists()) return null;
-  return normalizeRecord(snap.id, snap.data() as Record<string, unknown>);
+  const snap = await getDocument<Record<string, unknown>>(COLLECTION, id);
+  if (!snap) return null;
+  return normalizeRecord(snap.id, snap);
 }
 
 /** Lista todos los módulos. */
 export async function getModules(): Promise<{ items: ModuleRecord[] }> {
-  const rows = await firestoreService.getDocuments<ModuleDoc>(COLLECTION, 200);
-  const items = rows.map((r) => normalizeRecord(r.id, r.data as unknown as Record<string, unknown>));
+  const rows = await getCollection<ModuleDoc>(COLLECTION, 200);
+  const items = rows.map((r) => normalizeRecord(r.id, r as unknown as Record<string, unknown>));
   items.sort((a, b) => a.id.localeCompare(b.id));
   return { items };
 }
 
 /** Crea un módulo con id = name. */
 export async function addModule(data: { name: string; description: string }): Promise<void> {
-  const email = auth.currentUser?.email ?? undefined;
-  await setDoc(doc(db, COLLECTION, data.name.trim()), {
+  await createDocumentWithId(COLLECTION, data.name.trim(), {
     description: data.description.trim(),
     permissions: [],
     columns: [],
-    createBy: email,
-    createAt: serverTimestamp(),
   });
 }
 
 /** Actualiza un módulo (campos parciales). */
 export async function saveModule(id: string, data: ModuleEditInput): Promise<void> {
-  await firestoreService.updateDocument<ModuleDoc>(COLLECTION, id, data as Partial<ModuleDoc>);
+  await updateDocument<ModuleDoc>(COLLECTION, id, data as Partial<ModuleDoc>);
 }
 
 /** Elimina un módulo. */
 export async function deleteModule(id: string): Promise<void> {
-  await firestoreService.deleteDocument(COLLECTION, id);
+  await deleteDocument(COLLECTION, id);
 }

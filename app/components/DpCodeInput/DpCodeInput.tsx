@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
-import { getActiveSequenceByEntity, type SequenceRecord } from "~/features/sequences";
+import { getActiveSequenceByEntity, type SequenceRecord } from "~/features/system/sequences";
 
 const labelClass = "font-medium text-zinc-700 dark:text-zinc-300";
 const controlClass = "w-full";
@@ -60,7 +60,7 @@ export function DpCodeInput({
 
   let effectivePlaceholder = placeholder;
   if (loading) {
-    effectivePlaceholder = "Cargando…";
+    effectivePlaceholder = "Cargandoâ€¦";
   } else if (!sequence) {
     effectivePlaceholder = placeholder ?? "No hay secuencia para esta entidad";
   } else if (!allowManual) {

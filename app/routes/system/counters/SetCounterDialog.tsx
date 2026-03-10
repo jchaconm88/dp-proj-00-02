@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { getCounterById, addCounter, updateCounter } from "~/features/counters";
-import { getSequences, type SequenceRecord } from "~/features/sequences";
+import { getCounterById, addCounter, updateCounter } from "~/features/system/counters";
+import { getSequences, type SequenceRecord } from "~/features/system/sequences";
 
 export interface SetCounterDialogProps {
   visible: boolean;
@@ -117,7 +117,7 @@ export default function SetCounterDialog({
       onHide={onHide}
     >
       {loading ? (
-        <div className="py-8 text-center text-zinc-500">Cargando…</div>
+        <div className="py-8 text-center text-zinc-500">Cargandoâ€¦</div>
       ) : (
         <div className="flex flex-col gap-4 pt-2">
           {error && (

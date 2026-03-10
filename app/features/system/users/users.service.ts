@@ -1,5 +1,5 @@
 import { PROFILES_COLLECTION } from "~/lib/auth-context";
-import { firestoreService } from "~/lib/firestore.service";
+import { getCollection, updateDocument, deleteDocument } from "~/lib/firestore.service";
 import type { ProfileRecord } from "./users.types";
 
 type ProfileDoc = {
@@ -18,8 +18,8 @@ function toProfileRecord(id: string, data: ProfileDoc): ProfileRecord {
 }
 
 export async function getProfiles(): Promise<{ items: ProfileRecord[]; last: null }> {
-  const rows = await firestoreService.getDocuments<ProfileDoc>(PROFILES_COLLECTION, 200);
-  const items = rows.map((r) => toProfileRecord(r.id, r.data));
+  const rows = await getCollection<ProfileDoc>(PROFILES_COLLECTION, 200);
+  const items = rows.map((r) => toProfileRecord(r.id, r));
   items.sort((a, b) =>
     (a.displayName || a.email).localeCompare(b.displayName || b.email)
   );
@@ -27,7 +27,7 @@ export async function getProfiles(): Promise<{ items: ProfileRecord[]; last: nul
 }
 
 export async function saveProfile(id: string, data: Omit<ProfileRecord, "id">): Promise<void> {
-  await firestoreService.updateDocument(PROFILES_COLLECTION, id, {
+  await updateDocument(PROFILES_COLLECTION, id, {
     email: data.email,
     displayName: data.displayName,
     roleIds: data.roleIds,
@@ -35,5 +35,5 @@ export async function saveProfile(id: string, data: Omit<ProfileRecord, "id">): 
 }
 
 export async function deleteProfile(id: string): Promise<void> {
-  await firestoreService.deleteDocument(PROFILES_COLLECTION, id);
+  await deleteDocument(PROFILES_COLLECTION, id);
 }

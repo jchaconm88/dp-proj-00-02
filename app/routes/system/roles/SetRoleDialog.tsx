@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { getRoleById, addRole, updateRole } from "~/features/roles";
+import { getRoleById, addRole, updateRole } from "~/features/system/roles";
 
 export interface SetRoleDialogProps {
   visible: boolean;
@@ -84,7 +84,7 @@ export default function SetRoleDialog({
       onHide={onHide}
     >
       {loading ? (
-        <div className="py-8 text-center text-zinc-500">Cargando…</div>
+        <div className="py-8 text-center text-zinc-500">Cargandoâ€¦</div>
       ) : (
         <>
           {error && (

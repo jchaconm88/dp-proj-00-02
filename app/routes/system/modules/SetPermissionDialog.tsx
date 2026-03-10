@@ -1,9 +1,9 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { saveModule } from "~/features/modules";
-import type { ModulePermission } from "~/features/modules";
+import { saveModule } from "~/features/system/modules";
+import type { ModulePermission } from "~/features/system/modules";
 
 export interface SetPermissionDialogProps {
   visible: boolean;
