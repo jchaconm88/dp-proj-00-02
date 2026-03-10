@@ -8,7 +8,7 @@ import { updateRole, type RolePermissions } from "~/features/system/roles";
 import { getModules, getModule } from "~/features/system/modules";
 import type { ModuleRecord, ModulePermission } from "~/features/system/modules";
 
-export interface SetRolePermissionDialogProps {
+export interface RolePermissionDialogProps {
   visible: boolean;
   roleId: string;
   /** null = agregar (elegir módulo), string = editar ese módulo */
@@ -18,14 +18,14 @@ export interface SetRolePermissionDialogProps {
   onHide: () => void;
 }
 
-export default function SetRolePermissionDialog({
+export default function RolePermissionDialog({
   visible,
   roleId,
   editModuleId,
   currentPermissions,
   onSuccess,
   onHide,
-}: SetRolePermissionDialogProps) {
+}: RolePermissionDialogProps) {
   const isEdit = editModuleId != null;
   const [modules, setModules] = useState<ModuleRecord[]>([]);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(editModuleId);

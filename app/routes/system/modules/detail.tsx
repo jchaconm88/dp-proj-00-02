@@ -5,9 +5,9 @@ import type { ModuleRecord, ModulePermission, ModuleColumn } from "~/features/sy
 import type { Route } from "./+types/detail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetPermissionDialog from "./SetPermissionDialog";
-import SetColumnDialog from "./SetColumnDialog";
-import SetModuleDialog from "./SetModuleDialog";
+import PermissionDialog from "./permission-dialog";
+import ColumnDialog from "./column-dialog";
+import ModuleDialog from "./module-dialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -230,7 +230,7 @@ export default function ModuleDetail({ loaderData }: Route.ComponentProps) {
           />
         </section>
 
-        <SetPermissionDialog
+        <PermissionDialog
           visible={permissionDialogOpen}
           moduleId={moduleId}
           permissionIndex={permissionEditIndex}
@@ -239,7 +239,7 @@ export default function ModuleDetail({ loaderData }: Route.ComponentProps) {
           onHide={() => setPermissionDialogOpen(false)}
         />
 
-        <SetColumnDialog
+        <ColumnDialog
           visible={columnDialogOpen}
           moduleId={moduleId}
           columnIndex={columnEditIndex}
@@ -248,7 +248,7 @@ export default function ModuleDetail({ loaderData }: Route.ComponentProps) {
           onHide={() => setColumnDialogOpen(false)}
         />
 
-        <SetModuleDialog
+        <ModuleDialog
           visible={editModuleOpen}
           moduleId={moduleId}
           onSuccess={() => { setEditModuleOpen(false); revalidator.revalidate(); }}

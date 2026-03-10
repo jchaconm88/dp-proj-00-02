@@ -4,7 +4,7 @@ import { getCounters, deleteCounter, type CounterRecord } from "~/features/syste
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetCounterDialog from "./SetCounterDialog";
+import CounterDialog from "./counter-dialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -113,7 +113,7 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
         />
       </DpContent>
 
-      <SetCounterDialog
+      <CounterDialog
         visible={dialogVisible}
         counterId={editId}
         onSuccess={handleSuccess}

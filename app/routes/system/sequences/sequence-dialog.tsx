@@ -10,7 +10,7 @@ import {
 } from "~/features/system/sequences";
 import { RESET_PERIOD, statusToSelectOptions } from "~/constants/status-options";
 
-export interface SetSequenceDialogProps {
+export interface SequenceDialogProps {
   visible: boolean;
   /** Si viene un id, se edita; si es null, se crea */
   sequenceId: string | null;
@@ -22,12 +22,12 @@ const RESET_PERIOD_OPTIONS = statusToSelectOptions(RESET_PERIOD);
 
 const FORMAT_PLACEHOLDERS = "prefix | year | month | day | number";
 
-export default function SetSequenceDialog({
+export default function SequenceDialog({
   visible,
   sequenceId,
   onSuccess,
   onHide,
-}: SetSequenceDialogProps) {
+}: SequenceDialogProps) {
   const isEdit = !!sequenceId;
   const [entity, setEntity] = useState("");
   const [prefix, setPrefix] = useState("");

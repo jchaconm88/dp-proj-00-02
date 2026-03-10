@@ -5,7 +5,7 @@ import { DpContentSet } from "~/components/DpContent";
 import { getCounterById, addCounter, updateCounter } from "~/features/system/counters";
 import { getSequences, type SequenceRecord } from "~/features/system/sequences";
 
-export interface SetCounterDialogProps {
+export interface CounterDialogProps {
   visible: boolean;
   /** Si viene un id, se edita; si es null, se crea */
   counterId: string | null;
@@ -13,12 +13,12 @@ export interface SetCounterDialogProps {
   onHide: () => void;
 }
 
-export default function SetCounterDialog({
+export default function CounterDialog({
   visible,
   counterId,
   onSuccess,
   onHide,
-}: SetCounterDialogProps) {
+}: CounterDialogProps) {
   const isEdit = !!counterId;
   const [sequenceId, setSequenceId] = useState("");
   const [period, setPeriod] = useState("");

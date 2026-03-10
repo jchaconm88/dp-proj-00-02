@@ -42,13 +42,14 @@ New-Item -ItemType Directory -Force "app/routes/{module}/{feature}"
    - Componente recibe `{ loaderData }: Route.ComponentProps`
    - Usar `useRevalidator` para refrescar, NO `useEffect`
    - Usar `useMatch` para detectar rutas hijo (add/edit) ej: `useMatch("/{module}/{feature}/add")`
+   - Si la ruta es principal usar `<DpContent>`, si es anidada o de detalle (ej. `/:id/locations`) usar `<DpContentInfo>` con prop `onBack`.
    - `DpTable` con prop `data={loaderData.items}` y `loading={isLoading}`
 
 7. Crear `app/routes/{module}/{feature}/add.tsx` — solo `meta()` + `return null`
 
 8. Crear `app/routes/{module}/{feature}/edit.tsx` — solo `meta()` + `return null`
 
-9. Crear `app/routes/{module}/{feature}/Set{Feature}Dialog.tsx`:
+9. Crear `app/routes/{module}/{feature}/{feature}-dialog.tsx`:
    - Importar `useNavigation` de `react-router`
    - `const isNavigating = navigation.state !== "idle"`
    - `<DpContentSet saving={saving || isNavigating} saveDisabled={!valid || isNavigating}>`

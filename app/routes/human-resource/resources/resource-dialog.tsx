@@ -18,7 +18,7 @@ import {
   statusToSelectOptions,
 } from "~/constants/status-options";
 
-export interface SetResourceDialogProps {
+export interface ResourceDialogProps {
   visible: boolean;
   resourceId: string | null;
   onSuccess?: () => void;
@@ -28,12 +28,12 @@ export interface SetResourceDialogProps {
 const ENGAGEMENT_OPTIONS = statusToSelectOptions(RESOURCE_ENGAGEMENT_TYPE);
 const STATUS_OPTIONS = statusToSelectOptions(RESOURCE_STATUS);
 
-export default function SetResourceDialog({
+export default function ResourceDialog({
   visible,
   resourceId,
   onSuccess,
   onHide,
-}: SetResourceDialogProps) {
+}: ResourceDialogProps) {
   const navigation = useNavigation();
   const isNavigating = navigation.state !== "idle";
 

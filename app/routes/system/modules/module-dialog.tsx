@@ -2,23 +2,23 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
-import { getRoleById, addRole, updateRole } from "~/features/system/roles";
+import { addModule, saveModule, getModule } from "~/features/system/modules";
 
-export interface SetRoleDialogProps {
+export interface ModuleDialogProps {
   visible: boolean;
   /** Si viene un id, se edita; si es null, se crea */
-  roleId: string | null;
-  onSuccess?: () => void;
+  moduleId: string | null;
+  onSuccess?: (id: string) => void;
   onHide: () => void;
 }
 
-export default function SetRoleDialog({
+export default function ModuleDialog({
   visible,
-  roleId,
+  moduleId,
   onSuccess,
   onHide,
-}: SetRoleDialogProps) {
-  const isEdit = !!roleId;
+}: ModuleDialogProps) {
+  const isEdit = !!moduleId;
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -30,40 +30,39 @@ export default function SetRoleDialog({
   useEffect(() => {
     if (!visible) return;
     setError(null);
-    if (!roleId) {
+    if (!moduleId) {
       setName("");
       setDescription("");
       setLoading(false);
       return;
     }
     setLoading(true);
-    getRoleById(roleId)
+    getModule(moduleId)
       .then((data) => {
-        if (!data) { setError("Rol no encontrado."); return; }
-        setName(data.name ?? "");
+        if (!data) { setError("Módulo no encontrado."); return; }
+        setName(data.id);
         setDescription(data.description ?? "");
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "Error al cargar rol."))
+      .catch((err) => setError(err instanceof Error ? err.message : "Error al cargar módulo."))
       .finally(() => setLoading(false));
-  }, [visible, roleId]);
+  }, [visible, moduleId]);
 
   const save = async () => {
+    const nameTrim = name.trim();
+    const descTrim = description.trim();
+    if (!nameTrim) return;
     setSaving(true);
     setError(null);
     try {
-      if (roleId) {
-        await updateRole(roleId, {
-          name: name.trim(),
-          description: description.trim(),
-        });
+      if (moduleId) {
+        await saveModule(moduleId, { description: descTrim });
+        onSuccess?.(moduleId);
+        onHide();
       } else {
-        await addRole({
-          name: name.trim(),
-          description: description.trim() || null,
-        });
+        await addModule({ name: nameTrim, description: descTrim });
+        onSuccess?.(nameTrim);
+        onHide();
       }
-      onSuccess?.();
-      onHide();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar.");
     } finally {
@@ -73,7 +72,7 @@ export default function SetRoleDialog({
 
   return (
     <DpContentSet
-      title={isEdit ? "Editar rol" : "Agregar rol"}
+      title={isEdit ? "Editar módulo" : "Agregar módulo"}
       cancelLabel="Cancelar"
       onCancel={onHide}
       saveLabel="Guardar"
@@ -94,19 +93,23 @@ export default function SetRoleDialog({
           )}
           <DpInput
             type="input"
-            label="Nombre"
+            label="Nombre de la colección"
             name="name"
             value={name}
             onChange={setName}
-            placeholder="Ej. admin, editor"
+            placeholder="Ej. user"
+            disabled={isEdit}
           />
+          {isEdit && (
+            <span className="text-xs text-zinc-500">El nombre no se puede modificar.</span>
+          )}
           <DpInput
             type="input"
             label="Descripción"
             name="description"
             value={description}
             onChange={setDescription}
-            placeholder="Descripción del rol"
+            placeholder="Ej. Usuarios"
           />
         </>
       )}

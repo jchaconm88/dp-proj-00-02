@@ -4,7 +4,7 @@ import { getModules, deleteModule, type ModuleRecord } from "~/features/system/m
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetModuleDialog from "./SetModuleDialog";
+import ModuleDialog from "./module-dialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -110,7 +110,7 @@ export default function Modules({ loaderData }: Route.ComponentProps) {
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <SetModuleDialog
+      <ModuleDialog
         visible={dialogVisible}
         moduleId={editingId}
         onSuccess={(id) => {

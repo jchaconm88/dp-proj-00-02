@@ -68,7 +68,7 @@ export interface DpInputInputProps extends DpInputPropsBase {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  inputType?: "text" | "password";
+  inputType?: "text" | "password" | "time";
   rows?: number;
 }
 

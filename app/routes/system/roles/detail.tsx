@@ -10,8 +10,8 @@ import {
 import type { Route } from "./+types/detail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetRoleDialog from "./SetRoleDialog";
-import SetRolePermissionDialog from "./SetRolePermissionDialog";
+import RoleDialog from "./role-dialog";
+import RolePermissionDialog from "./role-permission-dialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -200,7 +200,7 @@ export default function RoleDetail({ loaderData }: Route.ComponentProps) {
           />
         </section>
 
-        <SetRolePermissionDialog
+        <RolePermissionDialog
           visible={permissionDialogOpen}
           roleId={roleId}
           editModuleId={permissionEditModuleId}
@@ -209,7 +209,7 @@ export default function RoleDetail({ loaderData }: Route.ComponentProps) {
           onHide={() => setPermissionDialogOpen(false)}
         />
 
-        <SetRoleDialog
+        <RoleDialog
           visible={editRoleOpen}
           roleId={roleId}
           onSuccess={() => { setEditRoleOpen(false); revalidator.revalidate(); }}

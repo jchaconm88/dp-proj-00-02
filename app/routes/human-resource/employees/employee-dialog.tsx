@@ -14,7 +14,7 @@ import { resolveCodeIfEmpty } from "~/features/system/sequences";
 import { getPositions } from "~/features/human-resource/positions";
 import { EMPLOYEE_STATUS, SALARY_TYPE, statusToSelectOptions } from "~/constants/status-options";
 
-export interface SetEmployeeDialogProps {
+export interface EmployeeDialogProps {
   visible: boolean;
   employeeId: string | null;
   onSuccess?: () => void;
@@ -24,12 +24,12 @@ export interface SetEmployeeDialogProps {
 const STATUS_OPTIONS   = statusToSelectOptions(EMPLOYEE_STATUS);
 const SALARY_OPTIONS   = statusToSelectOptions(SALARY_TYPE);
 
-export default function SetEmployeeDialog({
+export default function EmployeeDialog({
   visible,
   employeeId,
   onSuccess,
   onHide,
-}: SetEmployeeDialogProps) {
+}: EmployeeDialogProps) {
   const isEdit = !!employeeId;
   const navigation = useNavigation();
   const isNavigating = navigation.state !== "idle";

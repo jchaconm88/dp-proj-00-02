@@ -5,7 +5,7 @@ import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { EMPLOYEE_STATUS } from "~/constants/status-options";
-import SetEmployeeDialog from "./SetEmployeeDialog";
+import EmployeeDialog from "./employee-dialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -119,7 +119,7 @@ export default function EmployeesPage({ loaderData }: Route.ComponentProps) {
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <SetEmployeeDialog
+      <EmployeeDialog
         visible={dialogVisible}
         employeeId={editId}
         onSuccess={handleSuccess}

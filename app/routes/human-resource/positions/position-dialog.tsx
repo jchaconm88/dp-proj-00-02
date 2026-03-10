@@ -6,17 +6,17 @@ import { DpContentSet } from "~/components/DpContent";
 import { getPosition, addPosition, updatePosition } from "~/features/human-resource/positions";
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
 
-export interface SetPositionDialogProps {
+export interface PositionDialogProps {
   visible: boolean;
   positionId: string | null;
   onSuccess?: () => void;
 }
 
-export default function SetPositionDialog({
+export default function PositionDialog({
   visible,
   positionId,
   onSuccess,
-}: SetPositionDialogProps) {
+}: PositionDialogProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isNavigating = navigation.state !== "idle";

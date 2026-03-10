@@ -4,7 +4,7 @@ import { getRoles, deleteRole, type RoleRecord } from "~/features/system/roles";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetRoleDialog from "./SetRoleDialog";
+import RoleDialog from "./role-dialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -110,7 +110,7 @@ export default function Roles({ loaderData }: Route.ComponentProps) {
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <SetRoleDialog
+      <RoleDialog
         visible={dialogVisible}
         roleId={editingId}
         onSuccess={() => {

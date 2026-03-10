@@ -5,7 +5,7 @@ import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, DpTColumn, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { RESOURCE_ENGAGEMENT_TYPE, RESOURCE_STATUS } from "~/constants/status-options";
-import SetResourceDialog from "./SetResourceDialog";
+import ResourceDialog from "./resource-dialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -135,7 +135,7 @@ export default function ResourcesPage({ loaderData }: Route.ComponentProps) {
         </DpTColumn>
       </DpTable>
 
-      <SetResourceDialog
+      <ResourceDialog
         visible={dialogVisible}
         resourceId={editId}
         onSuccess={handleSuccess}

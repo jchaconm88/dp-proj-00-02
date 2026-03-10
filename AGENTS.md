@@ -21,7 +21,7 @@ app/
 │   │       ├── page.tsx          ← lista principal con clientLoader + DpTable
 │   │       ├── add.tsx           ← ruta hijo, solo retorna null (dialog en page.tsx)
 │   │       ├── edit.tsx          ← ruta hijo, solo retorna null
-│   │       └── Set{Feature}Dialog.tsx  ← formulario modal con DpContentSet
+│   │       └── {feature}-dialog.tsx  ← formulario modal con DpContentSet
 │   └── placeholder/              ← rutas futuras sin implementar
 ├── lib/               ← infraestructura compartida (NO lógica de dominio)
 │   ├── firebase.ts
@@ -120,7 +120,7 @@ import { get{Feature}s, delete{Feature} } from "~/features/{module}/{feature}";
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import Set{Feature}Dialog from "./Set{Feature}Dialog";
+import {Feature}Dialog from "./{feature}-dialog";
 
 export async function clientLoader() {
   const { items } = await get{Feature}s();
@@ -146,13 +146,13 @@ export function meta() {
 export default function {Feature}AddPage() { return null; }
 ```
 
-**`Set{Feature}Dialog.tsx`** — formulario modal:
+**`{feature}-dialog.tsx`** — formulario modal:
 ```tsx
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
 import { DpContentSet } from "~/components/DpContent";
 
-export default function Set{Feature}Dialog({ visible, ... }) {
+export default function {Feature}Dialog({ visible, ... }) {
   const navigation = useNavigation();
   const isNavigating = navigation.state !== "idle"; // deshabilitar durante nav
 
@@ -236,4 +236,5 @@ export async function clientLoader() {
 - **`meta()` en todas las rutas** — incluidas las rutas hijo (add/edit)
 - **TypeScript estricto** — tipar todos los parámetros y retornos de servicios
 - **Rutas configuradas en `routes.ts`** — NUNCA dependas del naming del archivo para el routing
+- **Páginas de Detalle / Sub-módulos** — Si la ruta es una página anidada (ej. `/:id/locations`, `/:id/costs`), utiliza OBLIGATORIAMENTE `<DpContentInfo>` (con prop `onBack`) en lugar de `<DpContent>` para proveer navegación de retroceso estándar.
 - **Firestore Service** — NUNCA importar `firebase/firestore` directamente en los .service.ts. Se deben usar OBLIGATORIAMENTE las funciones expuestas en `~/lib/firestore.service.ts` (`getDocument`, `addDocument`, `updateDocument`, etc.) ya que éstas inyectan campos de auditoría automáticamente de forma segura.

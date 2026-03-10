@@ -5,7 +5,7 @@ import { DpContentSet } from "~/components/DpContent";
 import { saveModule } from "~/features/system/modules";
 import type { ModuleColumn } from "~/features/system/modules";
 
-export interface SetColumnDialogProps {
+export interface ColumnDialogProps {
   visible: boolean;
   moduleId: string;
   /** null = agregar, number = editar en ese índice */
@@ -23,14 +23,14 @@ const defaultColumn: ModuleColumn = {
   format: "",
 };
 
-export default function SetColumnDialog({
+export default function ColumnDialog({
   visible,
   moduleId,
   columnIndex,
   currentColumns,
   onSuccess,
   onHide,
-}: SetColumnDialogProps) {
+}: ColumnDialogProps) {
   const isEdit = columnIndex !== null;
   const [order, setOrder] = useState(1);
   const [name, setName] = useState("");

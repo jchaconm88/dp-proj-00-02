@@ -12,7 +12,7 @@ import {
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
 import { RESOURCE_COST_TYPE, CURRENCY, statusToSelectOptions } from "~/constants/status-options";
 
-export interface SetResourceCostDialogProps {
+export interface ResourceCostDialogProps {
   visible: boolean;
   resourceId: string;
   costId: string | null;
@@ -23,13 +23,13 @@ export interface SetResourceCostDialogProps {
 const TYPE_OPTIONS = statusToSelectOptions(RESOURCE_COST_TYPE);
 const CURRENCY_OPTIONS = statusToSelectOptions(CURRENCY);
 
-export default function SetResourceCostDialog({
+export default function ResourceCostDialog({
   visible,
   resourceId,
   costId,
   onSuccess,
   onHide,
-}: SetResourceCostDialogProps) {
+}: ResourceCostDialogProps) {
   const isEdit = !!costId;
   const navigation = useNavigation();
   const isNavigating = navigation.state !== "idle";

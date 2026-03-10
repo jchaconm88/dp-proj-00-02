@@ -86,7 +86,7 @@ function filterMenu(items: MenuItemJson[], effectivePermissions: string[]): Menu
     .filter((item) => !item.children?.length || (item.children?.length ?? 0) > 0);
 }
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [{ title: "Panel" }, { name: "description", content: "Panel de administración" }];
 }
 
@@ -95,7 +95,7 @@ export function meta({}: Route.MetaArgs) {
  * Si no hay sesión activa, redirige a /login sin mostrar el componente ni ningún spinner.
  * También pre-carga los roles para el cálculo de permisos del menú.
  */
-export async function clientLoader({}: Route.ClientLoaderArgs) {
+export async function clientLoader({ }: Route.ClientLoaderArgs) {
   const user = await getAuthUser();
   if (!user) throw redirect("/login");
   const roles = await getAllRoles();
@@ -159,7 +159,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
   }, [sections, pathname]);
 
   useEffect(() => {
-    if (activeMenuTitle) setExpandedKeys((prev) => new Set(prev).add(activeMenuTitle));
+    if (activeMenuTitle) setExpandedKeys(new Set([activeMenuTitle]));
   }, [activeMenuTitle]);
 
   // clientLoader ya garantizó que hay usuario autenticado antes de renderizar.
@@ -230,9 +230,8 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar (estilo dp-proj-00-01) */}
         <aside
-          className={`flex shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 transition-[width] duration-200 dark:border-navy-600 dark:bg-navy-800 ${
-            sidebarOpen ? "w-64" : "w-16"
-          }`}
+          className={`flex shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 transition-[width] duration-200 dark:border-navy-600 dark:bg-navy-800 ${sidebarOpen ? "w-64" : "w-16"
+            }`}
         >
           <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden py-3">
             {sections.map((section, idx) => (
@@ -276,10 +275,9 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
                                       to={childHref}
                                       end={false}
                                       className={({ isActive }) =>
-                                        `mb-0.5 flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors no-underline ${
-                                          isActive
-                                            ? "bg-blue-100 font-medium text-blue-800 dark:bg-navy-500 dark:text-navy-100"
-                                            : "text-zinc-600 hover:bg-zinc-200/80 dark:text-navy-300 dark:hover:bg-navy-600"
+                                        `mb-0.5 flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition-colors no-underline ${isActive
+                                          ? "bg-blue-100 font-medium text-blue-800 dark:bg-navy-500 dark:text-navy-100"
+                                          : "text-zinc-600 hover:bg-zinc-200/80 dark:text-navy-300 dark:hover:bg-navy-600"
                                         }`
                                       }
                                     >
@@ -297,11 +295,10 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
                           key={i}
                           to={href}
                           title={item.title}
-                          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors no-underline ${
-                            isActive
-                              ? "bg-zinc-200 text-zinc-900 dark:bg-navy-500 dark:text-navy-100"
-                              : "text-zinc-700 hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600"
-                          }`}
+                          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors no-underline ${isActive
+                            ? "bg-zinc-200 text-zinc-900 dark:bg-navy-500 dark:text-navy-100"
+                            : "text-zinc-700 hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600"
+                            }`}
                         >
                           {item.icon && <i className={primeIconClass(item.icon)} aria-hidden />}
                           <span className="flex-1">{item.title}</span>
@@ -318,8 +315,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
                               to={firstChildLink.link!}
                               title={item.title}
                               className={({ isActive }) =>
-                                `flex flex-col items-center justify-center rounded-lg p-2.5 text-zinc-700 transition-colors hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600 ${
-                                  isActive ? "bg-zinc-200 dark:bg-navy-500" : ""
+                                `flex flex-col items-center justify-center rounded-lg p-2.5 text-zinc-700 transition-colors hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600 ${isActive ? "bg-zinc-200 dark:bg-navy-500" : ""
                                 }`
                               }
                             >
@@ -341,9 +337,8 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
                         <Link
                           to={href}
                           title={item.title}
-                          className={`flex flex-col items-center justify-center rounded-lg p-2.5 text-zinc-700 transition-colors hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600 no-underline ${
-                            isActive ? "bg-zinc-200 dark:bg-navy-500" : ""
-                          }`}
+                          className={`flex flex-col items-center justify-center rounded-lg p-2.5 text-zinc-700 transition-colors hover:bg-zinc-200/80 dark:text-navy-200 dark:hover:bg-navy-600 no-underline ${isActive ? "bg-zinc-200 dark:bg-navy-500" : ""
+                            }`}
                         >
                           <i className={primeIconClass(item.icon)} aria-hidden />
                         </Link>

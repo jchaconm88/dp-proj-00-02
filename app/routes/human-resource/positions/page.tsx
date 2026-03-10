@@ -4,7 +4,7 @@ import { getPositions, deletePositions, type PositionRecord } from "~/features/h
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetPositionDialog from "./SetPositionDialog";
+import PositionDialog from "./position-dialog";
 
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Código", column: "code", order: 1, display: true, filter: true },
@@ -99,7 +99,7 @@ export default function PositionsPage({ loaderData }: Route.ComponentProps) {
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <SetPositionDialog
+      <PositionDialog
         visible={isAdd || isEdit}
         positionId={currentId}
         onSuccess={handleSuccess}

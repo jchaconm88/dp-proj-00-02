@@ -5,7 +5,7 @@ import { DpContentSet } from "~/components/DpContent";
 import { saveModule } from "~/features/system/modules";
 import type { ModulePermission } from "~/features/system/modules";
 
-export interface SetPermissionDialogProps {
+export interface PermissionDialogProps {
   visible: boolean;
   moduleId: string;
   /** null = agregar, number = editar en ese índice */
@@ -15,14 +15,14 @@ export interface SetPermissionDialogProps {
   onHide: () => void;
 }
 
-export default function SetPermissionDialog({
+export default function PermissionDialog({
   visible,
   moduleId,
   permissionIndex,
   currentPermissions,
   onSuccess,
   onHide,
-}: SetPermissionDialogProps) {
+}: PermissionDialogProps) {
   const isEdit = permissionIndex !== null;
   const [code, setCode] = useState("");
   const [label, setLabel] = useState("");

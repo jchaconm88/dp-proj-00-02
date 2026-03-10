@@ -11,7 +11,7 @@ import type { Route } from "./+types/costs";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { RESOURCE_COST_TYPE, CURRENCY } from "~/constants/status-options";
-import SetResourceCostDialog from "./SetResourceCostDialog";
+import ResourceCostDialog from "./resource-cost-dialog";
 
 export function meta({ data }: Route.MetaArgs) {
   const resourceLabel = data?.resource?.code || "Recurso";
@@ -136,7 +136,7 @@ export default function ResourceCostsPage({ loaderData }: Route.ComponentProps) 
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <SetResourceCostDialog
+      <ResourceCostDialog
         visible={dialogVisible}
         resourceId={resourceId}
         costId={editCostId}

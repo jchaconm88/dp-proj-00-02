@@ -4,7 +4,7 @@ import { getSequences, deleteSequence, type SequenceRecord } from "~/features/sy
 import type { Route } from "./+types/page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import SetSequenceDialog from "./SetSequenceDialog";
+import SequenceDialog from "./sequence-dialog";
 import { RESET_PERIOD } from "~/constants/status-options";
 
 export function meta({}: Route.MetaArgs) {
@@ -127,7 +127,7 @@ export default function Sequences({ loaderData }: Route.ComponentProps) {
         />
       </DpContent>
 
-      <SetSequenceDialog
+      <SequenceDialog
         visible={dialogVisible}
         sequenceId={editId}
         onSuccess={handleSuccess}
