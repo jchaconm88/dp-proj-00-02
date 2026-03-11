@@ -64,7 +64,10 @@ export default [
       route("add",           "routes/transport/transport-contracts/TransportRateRuleAdd.tsx"),
       route("edit/:ruleId",  "routes/transport/transport-contracts/TransportRateRuleEdit.tsx"),
     ]),
-    route("transport/vehicles", "routes/placeholder/transport-vehicles.tsx"),
+    route("transport/vehicles", "routes/transport/vehicles/VehiclesPage.tsx", [
+      route("add", "routes/transport/vehicles/VehicleAdd.tsx"),
+      route("edit/:id", "routes/transport/vehicles/VehicleEdit.tsx"),
+    ]),
     route("transport/drivers", "routes/transport/drivers/DriversPage.tsx", [
       route("add", "routes/transport/drivers/DriverAdd.tsx"),
       route("edit/:id", "routes/transport/drivers/DriverEdit.tsx"),

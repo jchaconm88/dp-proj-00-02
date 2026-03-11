@@ -136,3 +136,19 @@ export const RATE_RULE_TYPE: Record<string, StatusOption> = {
   penalty:      { label: "Penalidad",    severity: "danger" },
   discount:     { label: "Descuento",    severity: "info" },
 };
+
+/** Estado de vehículo. */
+export const VEHICLE_STATUS: Record<string, StatusOption> = {
+  available: { label: "Disponible", severity: "success" },
+  assigned: { label: "Asignado", severity: "info" },
+  inactive: { label: "Inactivo", severity: "secondary" },
+};
+
+/** Tipo de vehículo. */
+export const VEHICLE_TYPE: Record<string, StatusOption> = {
+  truck: { label: "Camión", severity: "info" },
+  van: { label: "Camioneta", severity: "info" },
+  van_box: { label: "Furgón", severity: "info" },
+  trailer: { label: "Tráiler", severity: "info" },
+  other: { label: "Otro", severity: "secondary" },
+};
