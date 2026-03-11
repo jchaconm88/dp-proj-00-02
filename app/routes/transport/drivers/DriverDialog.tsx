@@ -69,7 +69,7 @@ export default function DriverDialog({
         setFirstName(emp.firstName ?? "");
         setLastName(emp.lastName ?? "");
         setDocumentNo(emp.documentNo ?? "");
-        setDocumentId(emp.documentType ?? "DNI"); // Assuming employee has documentType
+        setDocumentId(emp.documentTypeId ?? "DNI"); // Assuming employee has documentTypeId
         setPhoneNo(emp.phone ?? ""); // Assuming employee has phone
     }, []);
 

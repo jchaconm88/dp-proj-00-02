@@ -13,6 +13,7 @@ import {
 } from "~/features/master/clients";
 import { CLIENT_STATUS, PAYMENT_CONDITION, CURRENCY, statusToSelectOptions } from "~/constants/status-options";
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
+import { getDocumentTypes } from "~/features/master/document-types";
 
 export interface ClientDialogProps {
     visible: boolean;
@@ -25,11 +26,7 @@ const CLIENT_STATUS_OPTIONS = statusToSelectOptions(CLIENT_STATUS);
 const PAYMENT_OPTIONS = statusToSelectOptions(PAYMENT_CONDITION);
 const CURRENCY_OPTIONS = statusToSelectOptions(CURRENCY);
 
-const DOC_TYPE_OPTIONS = [
-    { label: "RUC", value: "RUC" },
-    { label: "DNI", value: "DNI" },
-    { label: "CE", value: "CE" },
-];
+
 
 export default function ClientDialog({
     visible,
@@ -45,7 +42,9 @@ export default function ClientDialog({
     const [code, setCode] = useState("");
     const [businessName, setBusinessName] = useState("");
     const [commercialName, setCommercialName] = useState("");
+    const [documentTypeId, setDocumentTypeId] = useState("");
     const [documentType, setDocumentType] = useState("");
+    const [docTypesOpts, setDocTypesOpts] = useState<{ label: string; value: string }[]>([]);
     const [documentNumber, setDocumentNumber] = useState("");
     const [contactName, setContactName] = useState("");
     const [contactEmail, setContactEmail] = useState("");
@@ -72,10 +71,16 @@ export default function ClientDialog({
     useEffect(() => {
         if (!visible) return;
         setError(null);
+        getDocumentTypes()
+            .then(({ items }) => {
+                setDocTypesOpts(items.map((i) => ({ label: i.name, value: i.id })));
+            })
+            .catch(() => setDocTypesOpts([]));
         if (!clientId) {
             setCode("");
             setBusinessName("");
             setCommercialName("");
+            setDocumentTypeId("");
             setDocumentType("");
             setDocumentNumber("");
             setContactName("");
@@ -103,6 +108,7 @@ export default function ClientDialog({
                 setCode(data.code ?? "");
                 setBusinessName(data.businessName ?? "");
                 setCommercialName(data.commercialName ?? "");
+                setDocumentTypeId(data.documentTypeId ?? "");
                 setDocumentType(data.documentType ?? "");
                 setDocumentNumber(data.documentNumber ?? "");
                 setContactName(data.contact.contactName ?? "");
@@ -144,6 +150,7 @@ export default function ClientDialog({
                 code: finalCode,
                 businessName: businessName.trim(),
                 commercialName: commercialName.trim(),
+                documentTypeId: documentTypeId.trim(),
                 documentType: documentType.trim(),
                 documentNumber: documentNumber.trim(),
                 contact: {
@@ -216,7 +223,17 @@ export default function ClientDialog({
                     <DpInput type="input" label="Nombre comercial" name="commercialName" value={commercialName} onChange={setCommercialName} placeholder="Super Norte" />
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <DpInput type="select" label="Tipo documento" name="documentType" value={documentType} onChange={(v) => setDocumentType(String(v))} options={DOC_TYPE_OPTIONS} placeholder="RUC / DNI" />
+                        <DpInput
+                            type="select" label="Tipo documento" name="documentTypeId"
+                            value={documentTypeId}
+                            onChange={(v) => {
+                                setDocumentTypeId(String(v));
+                                const found = docTypesOpts.find((o) => o.value === String(v));
+                                setDocumentType(found ? found.label : "");
+                            }}
+                            options={docTypesOpts}
+                            placeholder="Seleccione..."
+                        />
                         <DpInput type="input" label="Nº documento" name="documentNumber" value={documentNumber} onChange={setDocumentNumber} placeholder="20123456789" />
                     </div>
 

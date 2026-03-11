@@ -19,11 +19,12 @@ type EmployeeRow = EmployeeRecord & { fullName: string; salaryDisplay: string };
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Código",      column: "code",          order: 1, display: true, filter: true },
   { header: "Nombre",      column: "fullName",       order: 2, display: true, filter: true },
-  { header: "Nº Doc",      column: "documentNo",     order: 3, display: true, filter: true },
-  { header: "Cargo",       column: "position",       order: 4, display: true, filter: true },
-  { header: "F. Ingreso",  column: "hireDate",       order: 5, display: true, filter: true, type: "date" },
-  { header: "Estado",      column: "status",         order: 6, display: true, filter: true, type: "status", typeOptions: EMPLOYEE_STATUS },
-  { header: "Salario",     column: "salaryDisplay",  order: 7, display: true, filter: true },
+  { header: "Tipo Doc",    column: "documentType",   order: 3, display: true, filter: true },
+  { header: "Nº Doc",      column: "documentNo",     order: 4, display: true, filter: true },
+  { header: "Cargo",       column: "position",       order: 5, display: true, filter: true },
+  { header: "F. Ingreso",  column: "hireDate",       order: 6, display: true, filter: true, type: "date" },
+  { header: "Estado",      column: "status",         order: 7, display: true, filter: true, type: "status", typeOptions: EMPLOYEE_STATUS },
+  { header: "Salario",     column: "salaryDisplay",  order: 8, display: true, filter: true },
 ];
 
 export async function clientLoader() {

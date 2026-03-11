@@ -11,6 +11,7 @@ import {
   type ResourceStatus,
 } from "~/features/human-resource/resources";
 import { getPositions } from "~/features/human-resource/positions";
+import { getDocumentTypes } from "~/features/master/document-types";
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
 import {
   RESOURCE_ENGAGEMENT_TYPE,
@@ -42,7 +43,9 @@ export default function ResourceDialog({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [documentNo, setDocumentNo] = useState("");
-  const [documentId, setDocumentId] = useState("");
+  const [documentTypeId, setDocumentTypeId] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [docTypesOpts, setDocTypesOpts] = useState<{ label: string; value: string }[]>([]);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [positionId, setPositionId] = useState("");
@@ -66,13 +69,15 @@ export default function ResourceDialog({
     if (!visible) return;
     setError(null);
     getPositions().then(({ items }) => setPositions(items.map((p) => ({ id: p.id, name: p.name })))).catch(() => setPositions([]));
+    getDocumentTypes().then(({ items }) => setDocTypesOpts(items.map((i) => ({ label: i.name, value: i.id })))).catch(() => setDocTypesOpts([]));
 
     if (!resourceId) {
       setCode("");
       setFirstName("");
       setLastName("");
       setDocumentNo("");
-      setDocumentId("");
+      setDocumentTypeId("");
+      setDocumentType("");
       setPhone("");
       setEmail("");
       setPositionId("");
@@ -95,7 +100,8 @@ export default function ResourceDialog({
         setFirstName(data.firstName ?? "");
         setLastName(data.lastName ?? "");
         setDocumentNo(data.documentNo ?? "");
-        setDocumentId(data.documentId ?? "");
+        setDocumentTypeId(data.documentTypeId ?? "");
+        setDocumentType(data.documentType ?? "");
         setPhone(data.phone ?? "");
         setEmail(data.email ?? "");
         setPositionId(data.positionId ?? "");
@@ -127,7 +133,8 @@ export default function ResourceDialog({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         documentNo: documentNo.trim(),
-        documentId: documentId.trim(),
+        documentTypeId: documentTypeId.trim(),
+        documentType: documentType.trim(),
         phone: phone.trim(),
         email: email.trim(),
         positionId: positionId.trim(),
@@ -192,12 +199,17 @@ export default function ResourceDialog({
 
           <div className="grid gap-4 md:grid-cols-2">
             <DpInput
-              type="input"
+              type="select"
               label="Tipo de documento"
-              name="documentId"
-              value={documentId}
-              onChange={setDocumentId}
-              placeholder="DNI / RUC / Pasaporte"
+              name="documentTypeId"
+              value={documentTypeId}
+              onChange={(v) => {
+                setDocumentTypeId(String(v));
+                const found = docTypesOpts.find((o) => o.value === String(v));
+                setDocumentType(found ? found.label : "");
+              }}
+              options={docTypesOpts}
+              placeholder="Seleccione..."
             />
             <DpInput type="input" label="Nº documento" name="documentNo" value={documentNo} onChange={setDocumentNo} placeholder="12345678" />
           </div>

@@ -24,7 +24,10 @@ export default [
       route("add", "routes/system/counters/CounterAdd.tsx"),
       route("edit/:id", "routes/system/counters/CounterEdit.tsx"),
     ]),
-    route("master/document-types", "routes/placeholder/master-document-types.tsx"),
+    route("master/document-types", "routes/master/document-types/DocumentTypesPage.tsx", [
+      route("add", "routes/master/document-types/DocumentTypeAdd.tsx"),
+      route("edit/:id", "routes/master/document-types/DocumentTypeEdit.tsx"),
+    ]),
     route("master/documents", "routes/placeholder/master-documents.tsx"),
     route("master/clients", "routes/master/clients/ClientsPage.tsx", [
       route("add", "routes/master/clients/ClientAdd.tsx"),

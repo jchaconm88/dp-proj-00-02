@@ -90,6 +90,7 @@ function toRecord(doc: { id: string } & Record<string, unknown>): ClientRecord {
         code: String(doc.code ?? ""),
         businessName: String(doc.businessName ?? ""),
         commercialName: String(doc.commercialName ?? ""),
+        documentTypeId: String(doc.documentTypeId ?? ""),
         documentType: String(doc.documentType ?? ""),
         documentNumber: String(doc.documentNumber ?? ""),
         contact: toContact(doc.contact),
@@ -115,6 +116,7 @@ export async function addClient(data: ClientAddInput): Promise<string> {
         code: data.code.trim(),
         businessName: data.businessName.trim(),
         commercialName: data.commercialName.trim(),
+        documentTypeId: data.documentTypeId.trim(),
         documentType: data.documentType.trim(),
         documentNumber: data.documentNumber.trim(),
         contact: {
@@ -142,6 +144,7 @@ export async function updateClient(id: string, data: ClientEditInput): Promise<v
     if (data.code !== undefined) payload.code = data.code;
     if (data.businessName !== undefined) payload.businessName = data.businessName;
     if (data.commercialName !== undefined) payload.commercialName = data.commercialName;
+    if (data.documentTypeId !== undefined) payload.documentTypeId = data.documentTypeId;
     if (data.documentType !== undefined) payload.documentType = data.documentType;
     if (data.documentNumber !== undefined) payload.documentNumber = data.documentNumber;
     if (data.contact !== undefined) payload.contact = data.contact;

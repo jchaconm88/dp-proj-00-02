@@ -25,6 +25,7 @@ export interface ClientRecord {
     code: string;
     businessName: string;
     commercialName: string;
+    documentTypeId: string;
     documentType: string;
     documentNumber: string;
     contact: ClientContact;
@@ -37,6 +38,7 @@ export interface ClientAddInput {
     code: string;
     businessName: string;
     commercialName: string;
+    documentTypeId: string;
     documentType: string;
     documentNumber: string;
     contact: ClientContact;

@@ -152,3 +152,10 @@ export const VEHICLE_TYPE: Record<string, StatusOption> = {
   trailer: { label: "Tráiler", severity: "info" },
   other: { label: "Otro", severity: "secondary" },
 };
+
+/** Categoría de Tipo de Documento. */
+export const DOCUMENT_TYPE_CATEGORY: Record<string, StatusOption> = {
+  identity: { label: "Identidad", severity: "info" },
+  transport: { label: "Transporte", severity: "warning" },
+  vehicle: { label: "Vehículo", severity: "success" },
+};

@@ -12,6 +12,7 @@ import {
 } from "~/features/human-resource/employees";
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
 import { getPositions } from "~/features/human-resource/positions";
+import { getDocumentTypes } from "~/features/master/document-types";
 import { EMPLOYEE_STATUS, SALARY_TYPE, CURRENCY, statusToSelectOptions } from "~/constants/status-options";
 
 export interface EmployeeDialogProps {
@@ -39,7 +40,9 @@ export default function EmployeeDialog({
   const [firstName, setFirstName]   = useState("");
   const [lastName, setLastName]     = useState("");
   const [documentNo, setDocumentNo] = useState("");
-  const [documentId, setDocumentId] = useState("");
+  const [documentTypeId, setDocumentTypeId] = useState("");
+  const [documentType, setDocumentType] = useState("");
+  const [docTypesOpts, setDocTypesOpts] = useState<{ label: string; value: string }[]>([]);
   const [phone, setPhone]           = useState("");
   const [email, setEmail]           = useState("");
   const [positionId, setPositionId] = useState("");
@@ -70,9 +73,15 @@ export default function EmployeeDialog({
       })
       .catch(() => setPositionsOpts([]));
 
+    getDocumentTypes()
+      .then(({ items }) => {
+        setDocTypesOpts(items.map((i) => ({ label: i.name, value: i.id })));
+      })
+      .catch(() => setDocTypesOpts([]));
+
     if (!employeeId) {
       setCode(""); setFirstName(""); setLastName(""); setDocumentNo("");
-      setDocumentId(""); setPhone(""); setEmail(""); setPositionId("");
+      setDocumentTypeId(""); setDocumentType(""); setPhone(""); setEmail(""); setPositionId("");
       setPosition(""); setHireDate(""); setStatus("active");
       setSalaryType("monthly"); setBaseSalary(""); setCurrency("PEN");
       setCts(true); setGratification(true); setVacationDays("30");
@@ -87,7 +96,8 @@ export default function EmployeeDialog({
         setFirstName(data.firstName ?? "");
         setLastName(data.lastName ?? "");
         setDocumentNo(data.documentNo ?? "");
-        setDocumentId(data.documentId ?? "");
+        setDocumentTypeId(data.documentTypeId ?? "");
+        setDocumentType(data.documentType ?? "");
         setPhone(data.phone ?? "");
         setEmail(data.email ?? "");
         setPositionId(data.positionId ?? "");
@@ -122,7 +132,8 @@ export default function EmployeeDialog({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         documentNo: documentNo.trim(),
-        documentId: documentId.trim(),
+        documentTypeId: documentTypeId.trim(),
+        documentType: documentType.trim(),
         phone: phone.trim(),
         email: email.trim(),
         positionId: positionId.trim(),
@@ -182,7 +193,17 @@ export default function EmployeeDialog({
           <DpInput type="input"  label="Nombre"       name="firstName"  value={firstName}  onChange={setFirstName}  placeholder="Carlos" />
           <DpInput type="input"  label="Apellidos"    name="lastName"   value={lastName}   onChange={setLastName}   placeholder="Ramirez" />
           <DpInput type="input"  label="Nº documento" name="documentNo" value={documentNo} onChange={setDocumentNo} placeholder="12345678" />
-          <DpInput type="input"  label="Tipo doc."    name="documentId" value={documentId} onChange={setDocumentId} placeholder="DNI / RUC / Pasaporte" />
+          <DpInput
+            type="select" label="Tipo doc." name="documentTypeId"
+            value={documentTypeId}
+            onChange={(v) => {
+              setDocumentTypeId(String(v));
+              const found = docTypesOpts.find((o) => o.value === String(v));
+              setDocumentType(found ? found.label : "");
+            }}
+            options={docTypesOpts}
+            placeholder="Seleccione..."
+          />
           <DpInput type="input"  label="Teléfono"     name="phone"      value={phone}      onChange={setPhone}      placeholder="999 999 999" />
           <DpInput type="input"  label="Email"        name="email"      value={email}      onChange={setEmail}      placeholder="carlos@empresa.com" />
           <DpInput

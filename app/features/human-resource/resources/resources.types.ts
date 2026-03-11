@@ -7,7 +7,8 @@ export interface ResourceRecord {
   firstName: string;
   lastName: string;
   documentNo: string;
-  documentId: string;
+  documentTypeId: string;
+  documentType: string;
   phone: string;
   email: string;
   positionId: string;
@@ -22,7 +23,8 @@ export interface ResourceAddInput {
   firstName: string;
   lastName: string;
   documentNo: string;
-  documentId: string;
+  documentTypeId: string;
+  documentType: string;
   phone: string;
   email: string;
   positionId: string;

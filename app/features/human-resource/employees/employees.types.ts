@@ -19,7 +19,8 @@ export interface EmployeeRecord {
   firstName: string;
   lastName: string;
   documentNo: string;
-  documentId: string;
+  documentTypeId: string;
+  documentType: string;
   phone: string;
   email: string;
   positionId: string;
@@ -35,7 +36,8 @@ export interface EmployeeAddInput {
   firstName: string;
   lastName: string;
   documentNo: string;
-  documentId: string;
+  documentTypeId: string;
+  documentType: string;
   phone: string;
   email: string;
   positionId: string;

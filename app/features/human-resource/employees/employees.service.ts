@@ -54,7 +54,8 @@ function toEmployeeRecord(id: string, data: EmployeeDoc): EmployeeRecord {
     firstName: String(data.firstName ?? ""),
     lastName: String(data.lastName ?? ""),
     documentNo: String(data.documentNo ?? ""),
-    documentId: String(data.documentId ?? ""),
+    documentTypeId: String(data.documentTypeId ?? ""),
+    documentType: String(data.documentType ?? ""),
     phone: String(data.phone ?? data.phoneNo ?? ""),
     email: String(data.email ?? ""),
     positionId: String(data.positionId ?? ""),
@@ -87,7 +88,8 @@ export async function addEmployee(data: EmployeeAddInput): Promise<string> {
     firstName: data.firstName.trim(),
     lastName: data.lastName.trim(),
     documentNo: data.documentNo.trim(),
-    documentId: data.documentId.trim(),
+    documentTypeId: data.documentTypeId.trim(),
+    documentType: data.documentType.trim(),
     phone: data.phone.trim(),
     email: data.email.trim(),
     positionId: data.positionId.trim(),
@@ -113,7 +115,8 @@ export async function updateEmployee(id: string, data: EmployeeEditInput): Promi
   if (data.firstName !== undefined) payload.firstName = data.firstName;
   if (data.lastName !== undefined) payload.lastName = data.lastName;
   if (data.documentNo !== undefined) payload.documentNo = data.documentNo;
-  if (data.documentId !== undefined) payload.documentId = data.documentId;
+  if (data.documentTypeId !== undefined) payload.documentTypeId = data.documentTypeId;
+  if (data.documentType !== undefined) payload.documentType = data.documentType;
   if (data.phone !== undefined) payload.phone = data.phone;
   if (data.email !== undefined) payload.email = data.email;
   if (data.positionId !== undefined) payload.positionId = data.positionId;

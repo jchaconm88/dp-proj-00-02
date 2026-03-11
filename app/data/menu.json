@@ -86,14 +86,6 @@
         ]
       },
       {
-        "title": "Documentos",
-        "link": "/master/documents",
-        "permission": [
-          "view",
-          "document"
-        ]
-      },
-      {
         "title": "Clientes",
         "link": "/master/clients",
         "permission": [
