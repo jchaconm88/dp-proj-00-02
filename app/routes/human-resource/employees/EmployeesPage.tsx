@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
 import { getEmployees, deleteEmployee, deleteEmployees, type EmployeeRecord } from "~/features/human-resource/employees";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/EmployeesPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import { EMPLOYEE_STATUS } from "~/constants/status-options";
-import EmployeeDialog from "./employee-dialog";
+import { EMPLOYEE_STATUS, CURRENCY } from "~/constants/status-options";
+import EmployeeDialog from "./EmployeeDialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,7 +31,7 @@ export async function clientLoader() {
   const rows: EmployeeRow[] = items.map((e) => ({
     ...e,
     fullName: `${e.firstName} ${e.lastName}`.trim() || "—",
-    salaryDisplay: e.payroll ? `${e.payroll.baseSalary} ${e.payroll.currency}` : "—",
+    salaryDisplay: e.payroll ? `${Number(e.payroll.baseSalary).toFixed(2)} ${CURRENCY[e.payroll.currency]?.label.split(' ')[0] || e.payroll.currency}` : "—",
   }));
   return { rows };
 }

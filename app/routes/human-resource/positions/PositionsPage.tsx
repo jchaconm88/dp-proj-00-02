@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
 import { getPositions, deletePositions, type PositionRecord } from "~/features/human-resource/positions";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/PositionsPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import PositionDialog from "./position-dialog";
+import PositionDialog from "./PositionDialog";
 
 const TABLE_DEF: DpTableDefColumn[] = [
   { header: "Código", column: "code", order: 1, display: true, filter: true },

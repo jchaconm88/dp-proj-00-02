@@ -1,34 +1,34 @@
 import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator } from "react-router";
-import { getRoles, deleteRole, type RoleRecord } from "~/features/system/roles";
-import type { Route } from "./+types/page";
+import { getModules, deleteModule, type ModuleRecord } from "~/features/system/modules";
+import type { Route } from "./+types/ModulesPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import RoleDialog from "./role-dialog";
+import ModuleDialog from "./ModuleDialog";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Roles" },
-    { name: "description", content: "Mantenimiento de roles" },
+    { title: "Módulos" },
+    { name: "description", content: "Mantenimiento de módulos del sistema" },
   ];
 }
 
 // clientLoader: carga datos antes de renderizar el componente.
 export async function clientLoader({}: Route.ClientLoaderArgs) {
-  const { items } = await getRoles();
-  return { roles: items };
+  const { items } = await getModules();
+  return { modules: items };
 }
 
 const TABLE_DEF: DpTableDefColumn[] = [
-  { header: "Nombre", column: "name", order: 1, display: true, filter: true },
+  { header: "Colección", column: "id", order: 1, display: true, filter: true },
   { header: "Descripción", column: "description", order: 2, display: true, filter: true },
 ];
 
-export default function Roles({ loaderData }: Route.ComponentProps) {
+export default function Modules({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const revalidator = useRevalidator();
-  const tableRef = useRef<DpTableRef<RoleRecord>>(null);
+  const tableRef = useRef<DpTableRef<ModuleRecord>>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -49,23 +49,23 @@ export default function Roles({ loaderData }: Route.ComponentProps) {
     setDialogVisible(true);
   };
 
-  const openEdit = (role: RoleRecord) => {
-    setEditingId(role.id);
+  const openEdit = (module: ModuleRecord) => {
+    setEditingId(module.id);
     setDialogVisible(true);
   };
 
-  const openInfo = (role: RoleRecord) => {
-    navigate("/system/roles/" + encodeURIComponent(role.id));
+  const openInfo = (module: ModuleRecord) => {
+    navigate("/system/modules/" + encodeURIComponent(module.id));
   };
 
   const handleDeleteSelected = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
     if (selected.length === 0) return;
-    if (!confirm(`Â¿Eliminar ${selected.length} rol(es)?`)) return;
+    if (!confirm(`Â¿Eliminar ${selected.length} módulo(s)?`)) return;
     setSaving(true);
     setError(null);
     try {
-      await Promise.all(selected.map((r) => deleteRole(r.id)));
+      await Promise.all(selected.map((m) => deleteModule(m.id)));
       tableRef.current?.clearSelectedRows();
       revalidator.revalidate();
     } catch (err) {
@@ -76,7 +76,7 @@ export default function Roles({ loaderData }: Route.ComponentProps) {
   };
 
   return (
-    <DpContent title="ROLES">
+    <DpContent title="MÓDULOS">
       <DpContentHeader
         filterValue={filterValue}
         onFilter={handleFilter}
@@ -85,7 +85,7 @@ export default function Roles({ loaderData }: Route.ComponentProps) {
         onDelete={handleDeleteSelected}
         deleteDisabled={selectedCount === 0 || saving}
         loading={isLoading}
-        filterPlaceholder="Filtrar por nombre o descripción..."
+        filterPlaceholder="Filtrar por colección o descripción..."
       />
 
       {error && (
@@ -95,27 +95,32 @@ export default function Roles({ loaderData }: Route.ComponentProps) {
       )}
 
       {/* data prop: modo controlado â€” se actualiza automáticamente con cada revalidación */}
-      <DpTable<RoleRecord>
+      <DpTable<ModuleRecord>
         ref={tableRef}
-        data={loaderData.roles}
+        data={loaderData.modules}
         loading={isLoading}
         tableDef={TABLE_DEF}
-        linkColumn="name"
+        linkColumn="id"
         onDetail={openInfo}
         onEdit={openEdit}
         onSelectionChange={(rows) => setSelectedCount(rows.length)}
         showFilterInHeader={false}
-        filterPlaceholder="Filtrar por nombre o descripción..."
-        emptyMessage='No hay roles en la colección "roles".'
+        filterPlaceholder="Filtrar por colección o descripción..."
+        emptyMessage='No hay módulos en la colección "modules".'
         emptyFilterMessage="No hay resultados para el filtro."
       />
 
-      <RoleDialog
+      <ModuleDialog
         visible={dialogVisible}
-        roleId={editingId}
-        onSuccess={() => {
+        moduleId={editingId}
+        onSuccess={(id) => {
           setDialogVisible(false);
-          revalidator.revalidate();
+          if (!editingId) {
+            // Si es nuevo, navegar a su detalle
+            navigate("/system/modules/" + encodeURIComponent(id));
+          } else {
+            revalidator.revalidate();
+          }
         }}
         onHide={() => setDialogVisible(false)}
       />

@@ -16,13 +16,13 @@ app/
 │   │   │   └── index.ts              ← barrel: export * from types + service
 ├── routes/
 │   ├── dashboard.tsx             ← layout protegido (auth en clientLoader)
-│   ├── {module}/                 ← agrupado por módulo según menu.json (system, human-resources, etc.)
-│   │   └── {feature}/
-│   │       ├── page.tsx          ← lista principal con clientLoader + DpTable
-│   │       ├── add.tsx           ← ruta hijo, solo retorna null (dialog en page.tsx)
-│   │       ├── edit.tsx          ← ruta hijo, solo retorna null
-│   │       └── {feature}-dialog.tsx  ← formulario modal con DpContentSet
-│   └── placeholder/              ← rutas futuras sin implementar
+│   └── {module}/                 ← agrupado por módulo según menu.json (system, human-resources, etc.)
+│       └── {feature}/
+│           ├── {Features}Page.tsx       ← lista principal (Plural) con clientLoader + DpTable
+│           ├── {Feature}Add.tsx         ← ruta hijo (Singular), solo retorna null
+│           ├── {Feature}Edit.tsx        ← ruta hijo (Singular), solo retorna null
+│           └── {Feature}Dialog.tsx      ← formulario modal (Singular) con DpContentSet
+└── placeholder/              ← rutas futuras sin implementar
 ├── lib/               ← infraestructura compartida (NO lógica de dominio)
 │   ├── firebase.ts
 │   ├── auth-context.tsx
@@ -111,23 +111,27 @@ export * from "./{feature}.service";
 
 ### 4.2 Paso 2 — Crear rutas en `routes/{module}/{feature}/`
 
+**Convención estricta de PascalCase (Singular vs Plural):**
+- **Plural:** Pantallas de listados (`ClientsPage.tsx`, `EmployeesPage.tsx`).
+- **Singular:** Formularios, Rutas de Acción o Modales (`ClientAdd.tsx`, `ClientEdit.tsx`, `ClientDialog.tsx`).
+
 Nota: `{module}` debe coincidir con los grupos definidos en `app/data/menu.json` (ej: `system`, `human-resource`, `master`, `logistic`, `transport`).
 
-**`page.tsx`** — lista principal:
+**`{Features}Page.tsx`** — lista principal:
 ```tsx
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
 import { get{Feature}s, delete{Feature} } from "~/features/{module}/{feature}";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/{Features}Page";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import {Feature}Dialog from "./{feature}-dialog";
+import {Feature}Dialog from "./{Feature}Dialog";
 
 export async function clientLoader() {
   const { items } = await get{Feature}s();
   return { items };
 }
 
-export default function {Feature}Page({ loaderData }: Route.ComponentProps) {
+export default function {Features}Page({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const navigation = useNavigation();
   const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
@@ -138,15 +142,15 @@ export default function {Feature}Page({ loaderData }: Route.ComponentProps) {
 }
 ```
 
-**`add.tsx`** y **`edit.tsx`** — rutas hijo (solo meta + null):
+**`{Feature}Add.tsx`** y **`{Feature}Edit.tsx`** — rutas hijo (solo meta + null):
 ```tsx
 export function meta() {
   return [{ title: "Agregar {Feature}" }];
 }
-export default function {Feature}AddPage() { return null; }
+export default function {Feature}Add() { return null; }
 ```
 
-**`{feature}-dialog.tsx`** — formulario modal:
+**`{Feature}Dialog.tsx`** — formulario modal:
 ```tsx
 import { useNavigation } from "react-router";
 import { DpInput } from "~/components/DpInput";
@@ -169,9 +173,9 @@ export default function {Feature}Dialog({ visible, ... }) {
 ### 4.3 Paso 3 — Registrar en `routes.ts`
 
 ```typescript
-route("{module}/{feature}", "routes/{module}/{feature}/page.tsx", [
-  route("add",       "routes/{module}/{feature}/add.tsx"),
-  route("edit/:id",  "routes/{module}/{feature}/edit.tsx"),
+route("{module}/{feature}", "routes/{module}/{feature}/{Features}Page.tsx", [
+  route("add",       "routes/{module}/{feature}/{Feature}Add.tsx"),
+  route("edit/:id",  "routes/{module}/{feature}/{Feature}Edit.tsx"),
 ]),
 ```
 

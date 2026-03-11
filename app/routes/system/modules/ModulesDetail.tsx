@@ -2,12 +2,12 @@ import { useRef, useState, useMemo } from "react";
 import { useNavigate, useNavigation, useRevalidator } from "react-router";
 import { getModule, saveModule } from "~/features/system/modules";
 import type { ModuleRecord, ModulePermission, ModuleColumn } from "~/features/system/modules";
-import type { Route } from "./+types/detail";
+import type { Route } from "./+types/ModulesDetail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import PermissionDialog from "./permission-dialog";
-import ColumnDialog from "./column-dialog";
-import ModuleDialog from "./module-dialog";
+import PermissionDialog from "./PermissionDialog";
+import ColumnDialog from "./ColumnDialog";
+import ModuleDialog from "./ModuleDialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [

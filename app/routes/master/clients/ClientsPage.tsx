@@ -5,11 +5,11 @@ import {
     deleteClients,
     type ClientRecord,
 } from "~/features/master/clients";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/ClientsPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, DpTColumn, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { CLIENT_STATUS } from "~/constants/status-options";
-import ClientDialog from "./client-dialog";
+import ClientDialog from "./ClientDialog";
 
 export function meta({ }: Route.MetaArgs) {
     return [

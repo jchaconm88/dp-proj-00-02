@@ -1,4 +1,4 @@
-import type { Route } from "./+types/add";
+import type { Route } from "./+types/DriverAdd";
 
 export function meta({ }: Route.MetaArgs) {
     return [

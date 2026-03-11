@@ -7,11 +7,11 @@ import {
   type ResourceRecord,
   type ResourceCostRecord,
 } from "~/features/human-resource/resources";
-import type { Route } from "./+types/costs";
+import type { Route } from "./+types/CostsPage";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { RESOURCE_COST_TYPE, CURRENCY } from "~/constants/status-options";
-import ResourceCostDialog from "./resource-cost-dialog";
+import ResourceCostDialog from "./ResourceCostDialog";
 
 export function meta({ data }: Route.MetaArgs) {
   const resourceLabel = data?.resource?.code || "Recurso";

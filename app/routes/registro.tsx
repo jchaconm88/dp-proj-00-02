@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "~/lib/auth-context";
-import type { Route } from "./+types/registro";
+import type { Route } from "./+types/Registro";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Registro" }, { name: "description", content: "Crear cuenta" }];

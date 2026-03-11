@@ -113,3 +113,26 @@ export const CALCULATION_TYPE: Record<string, StatusOption> = {
   percentage: { label: "Porcentaje del valor", severity: "secondary" },
   formula: { label: "Fórmula compleja", severity: "secondary" },
 };
+
+/** Estado de contrato de transporte. */
+export const CONTRACT_STATUS: Record<string, StatusOption> = {
+  draft:     { label: "Borrador",  severity: "secondary" },
+  active:    { label: "Activo",    severity: "success" },
+  expired:   { label: "Expirado",  severity: "warning" },
+  cancelled: { label: "Cancelado", severity: "danger" },
+};
+
+/** Ciclo de facturación. */
+export const BILLING_CYCLE: Record<string, StatusOption> = {
+  monthly:  { label: "Mensual",   severity: "info" },
+  weekly:   { label: "Semanal",   severity: "info" },
+  per_trip: { label: "Por viaje", severity: "info" },
+};
+
+/** Tipo de regla de tarifa. */
+export const RATE_RULE_TYPE: Record<string, StatusOption> = {
+  base:         { label: "Tarifa Base",  severity: "success" },
+  extra_charge: { label: "Recargo",      severity: "warning" },
+  penalty:      { label: "Penalidad",    severity: "danger" },
+  discount:     { label: "Descuento",    severity: "info" },
+};

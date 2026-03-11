@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate, redirect } from "react-router";
 import { useAuth } from "~/lib/auth-context";
 import { useTheme } from "~/lib/theme-context";
-import type { Route } from "./+types/dashboard";
+import type { Route } from "./+types/Dashboard";
 import menuData from "~/data/menu.json";
 import { getAllRoles, type RoleRecord } from "~/features/system/roles";
 import { isGranted } from "~/lib/accessService";

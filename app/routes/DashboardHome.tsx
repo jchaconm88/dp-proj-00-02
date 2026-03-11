@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { useAuth } from "~/lib/auth-context";
-import type { Route } from "./+types/dashboard-home";
+import type { Route } from "./+types/DashboardHome";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Inicio - Panel" }, { name: "description", content: "Panel de control" }];

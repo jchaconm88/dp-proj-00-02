@@ -6,10 +6,10 @@ import {
     deleteClientLocations,
     type ClientLocationRecord,
 } from "~/features/master/clients";
-import type { Route } from "./+types/locations";
+import type { Route } from "./+types/LocationsPage";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import LocationDialog from "./location-dialog";
+import LocationDialog from "./LocationDialog";
 
 export function meta({ }: Route.MetaArgs) {
     return [

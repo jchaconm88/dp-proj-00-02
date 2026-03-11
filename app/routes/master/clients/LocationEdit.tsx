@@ -1,4 +1,4 @@
-import type { Route } from "./+types/locations-edit";
+import type { Route } from "./+types/LocationEdit";
 
 export function meta({ }: Route.MetaArgs) {
     return [

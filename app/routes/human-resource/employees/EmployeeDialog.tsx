@@ -12,7 +12,7 @@ import {
 } from "~/features/human-resource/employees";
 import { resolveCodeIfEmpty } from "~/features/system/sequences";
 import { getPositions } from "~/features/human-resource/positions";
-import { EMPLOYEE_STATUS, SALARY_TYPE, statusToSelectOptions } from "~/constants/status-options";
+import { EMPLOYEE_STATUS, SALARY_TYPE, CURRENCY, statusToSelectOptions } from "~/constants/status-options";
 
 export interface EmployeeDialogProps {
   visible: boolean;
@@ -23,6 +23,7 @@ export interface EmployeeDialogProps {
 
 const STATUS_OPTIONS   = statusToSelectOptions(EMPLOYEE_STATUS);
 const SALARY_OPTIONS   = statusToSelectOptions(SALARY_TYPE);
+const CURRENCY_OPTIONS = statusToSelectOptions(CURRENCY);
 
 export default function EmployeeDialog({
   visible,
@@ -211,7 +212,11 @@ export default function EmployeeDialog({
                 options={SALARY_OPTIONS}
               />
               <DpInput type="number" label="Salario base" name="baseSalary" value={baseSalary} onChange={setBaseSalary} placeholder="2800" />
-              <DpInput type="input"  label="Moneda"       name="currency"   value={currency}   onChange={setCurrency}   placeholder="PEN" />
+              <DpInput
+                type="select" label="Moneda" name="currency"
+                value={currency} onChange={(v) => setCurrency(String(v))}
+                options={CURRENCY_OPTIONS}
+              />
             </div>
           </div>
 

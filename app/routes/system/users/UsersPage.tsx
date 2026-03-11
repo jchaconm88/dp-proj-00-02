@@ -6,7 +6,7 @@ import {
   saveProfile,
   type ProfileRecord,
 } from "~/features/system/users";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/UsersPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 

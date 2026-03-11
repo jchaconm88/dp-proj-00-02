@@ -1,36 +1,50 @@
 import { useRef, useState } from "react";
 import { useNavigate, useMatch, Outlet, useNavigation, useRevalidator } from "react-router";
-import { getCounters, deleteCounter, type CounterRecord } from "~/features/system/counters";
-import type { Route } from "./+types/page";
+import { getSequences, deleteSequence, type SequenceRecord } from "~/features/system/sequences";
+import type { Route } from "./+types/SequencesPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import CounterDialog from "./counter-dialog";
+import SequenceDialog from "./SequenceDialog";
+import { RESET_PERIOD } from "~/constants/status-options";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Contadores" },
-    { name: "description", content: "Mantenimiento de contadores de secuencias" },
+    { title: "Secuencias" },
+    { name: "description", content: "Mantenimiento de secuencias de numeración" },
   ];
 }
 
 // clientLoader: carga datos antes de renderizar el componente.
+// El PaceLoader se activa automáticamente via useNavigation() durante la transición.
 export async function clientLoader({}: Route.ClientLoaderArgs) {
-  const { items } = await getCounters();
-  return { counters: items };
+  const { items } = await getSequences();
+  return { sequences: items };
 }
 
 const TABLE_DEF: DpTableDefColumn[] = [
-  { header: "Secuencia", column: "sequence", order: 1, display: true, filter: true },
-  { header: "Periodo", column: "period", order: 2, display: true, filter: true },
-  { header: "Último número", column: "lastNumber", order: 3, display: true, filter: true },
-  { header: "Activo", column: "active", order: 4, display: true, filter: true, type: "bool" },
+  { header: "Entidad", column: "entity", order: 1, display: true, filter: true },
+  { header: "Prefijo", column: "prefix", order: 2, display: true, filter: true },
+  { header: "Dígitos", column: "digits", order: 3, display: true, filter: true },
+  { header: "Formato", column: "format", order: 4, display: true, filter: true },
+  {
+    header: "Reinicio",
+    column: "resetPeriod",
+    order: 5,
+    display: true,
+    filter: true,
+    type: "status",
+    typeOptions: RESET_PERIOD,
+  },
+  { header: "Override manual", column: "allowManualOverride", order: 6, display: true, filter: false, type: "bool" },
+  { header: "Evitar huecos", column: "preventGaps", order: 7, display: true, filter: false, type: "bool" },
+  { header: "Activo", column: "active", order: 8, display: true, filter: true, type: "bool" },
 ];
 
-export default function Counters({ loaderData }: Route.ComponentProps) {
+export default function Sequences({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const revalidator = useRevalidator();
-  const tableRef = useRef<DpTableRef<CounterRecord>>(null);
+  const tableRef = useRef<DpTableRef<SequenceRecord>>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -40,8 +54,8 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
   const isLoading = navigation.state !== "idle" || revalidator.state === "loading";
 
   // Detección de diálogo activo por URL â€” useMatch es la API oficial de RR v7
-  const addMatch = useMatch("/system/counters/add");
-  const editMatch = useMatch("/system/counters/edit/:id");
+  const addMatch = useMatch("/system/sequences/add");
+  const editMatch = useMatch("/system/sequences/edit/:id");
   const isAdd = !!addMatch;
   const editId = editMatch?.params.id ? decodeURIComponent(editMatch.params.id) : null;
   const dialogVisible = isAdd || !!editId;
@@ -51,22 +65,22 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
     tableRef.current?.filter(value);
   };
 
-  const openAdd = () => navigate("/system/counters/add");
-  const openEdit = (c: CounterRecord) =>
-    navigate("/system/counters/edit/" + encodeURIComponent(c.id));
-  const handleHide = () => navigate("/system/counters");
+  const openAdd = () => navigate("/system/sequences/add");
+  const openEdit = (s: SequenceRecord) =>
+    navigate("/system/sequences/edit/" + encodeURIComponent(s.id));
+  const handleHide = () => navigate("/system/sequences");
 
-  // Refresca datos re-ejecutando el clientLoader
+  // Refresca datos re-ejecutando el clientLoader sin necesidad de refetch manual
   const handleSuccess = () => revalidator.revalidate();
 
   const handleDeleteSelected = async () => {
     const selected = tableRef.current?.getSelectedRows() ?? [];
     if (selected.length === 0) return;
-    if (!confirm(`Â¿Eliminar ${selected.length} contador(es)?`)) return;
+    if (!confirm(`Â¿Eliminar ${selected.length} secuencia(s)?`)) return;
     setSaving(true);
     setError(null);
     try {
-      await Promise.all(selected.map((c) => deleteCounter(c.id)));
+      await Promise.all(selected.map((s) => deleteSequence(s.id)));
       tableRef.current?.clearSelectedRows();
       revalidator.revalidate();
     } catch (err) {
@@ -78,7 +92,7 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <DpContent title="CONTADORES">
+      <DpContent title="SECUENCIAS">
         <DpContentHeader
           filterValue={filterValue}
           onFilter={handleFilter}
@@ -87,7 +101,7 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
           onDelete={handleDeleteSelected}
           deleteDisabled={selectedCount === 0 || saving}
           loading={isLoading}
-          filterPlaceholder="Filtrar por secuencia, periodo..."
+          filterPlaceholder="Filtrar por entidad, prefijo..."
         />
 
         {error && (
@@ -97,25 +111,25 @@ export default function Counters({ loaderData }: Route.ComponentProps) {
         )}
 
         {/* data prop: modo controlado â€” se actualiza automáticamente con cada revalidación */}
-        <DpTable<CounterRecord>
+        <DpTable<SequenceRecord>
           ref={tableRef}
-          data={loaderData.counters}
+          data={loaderData.sequences}
           loading={isLoading}
           tableDef={TABLE_DEF}
-          linkColumn="sequence"
+          linkColumn="entity"
           onDetail={openEdit}
           onEdit={openEdit}
           onSelectionChange={(rows) => setSelectedCount(rows.length)}
           showFilterInHeader={false}
           filterPlaceholder="Filtrar..."
-          emptyMessage='No hay contadores en la colección "counters".'
+          emptyMessage='No hay secuencias en la colección "sequences".'
           emptyFilterMessage="No hay resultados para el filtro."
         />
       </DpContent>
 
-      <CounterDialog
+      <SequenceDialog
         visible={dialogVisible}
-        counterId={editId}
+        sequenceId={editId}
         onSuccess={handleSuccess}
         onHide={handleHide}
       />

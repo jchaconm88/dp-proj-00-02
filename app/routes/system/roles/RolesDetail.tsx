@@ -7,11 +7,11 @@ import {
   type RoleRecord,
   type RolePermissions,
 } from "~/features/system/roles";
-import type { Route } from "./+types/detail";
+import type { Route } from "./+types/RolesDetail";
 import { DpContentInfo, DpContentHeader } from "~/components/DpContent";
 import { DpTable, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
-import RoleDialog from "./role-dialog";
-import RolePermissionDialog from "./role-permission-dialog";
+import RoleDialog from "./RoleDialog";
+import RolePermissionDialog from "./RolePermissionDialog";
 
 export function meta({ params }: Route.MetaArgs) {
   return [

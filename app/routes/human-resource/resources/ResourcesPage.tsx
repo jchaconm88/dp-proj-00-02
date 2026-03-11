@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate, useNavigation, useRevalidator, useMatch } from "react-router";
 import { getResources, deleteResources, type ResourceRecord } from "~/features/human-resource/resources";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/ResourcesPage";
 import { DpContent, DpContentHeader } from "~/components/DpContent";
 import { DpTable, DpTColumn, type DpTableRef, type DpTableDefColumn } from "~/components/DpTable";
 import { RESOURCE_ENGAGEMENT_TYPE, RESOURCE_STATUS } from "~/constants/status-options";
-import ResourceDialog from "./resource-dialog";
+import ResourceDialog from "./ResourceDialog";
 
 export function meta({}: Route.MetaArgs) {
   return [

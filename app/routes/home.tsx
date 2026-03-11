@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "~/lib/auth-context";
-import type { Route } from "./+types/home";
+import type { Route } from "./+types/Home";
 
 export function meta({}: Route.MetaArgs) {
   return [
